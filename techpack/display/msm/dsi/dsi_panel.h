@@ -185,6 +185,12 @@ struct drm_panel_esd_config {
 #endif
 };
 
+#define BRIGHTNESS_ALPHA_PAIR_LEN 2
+struct brightness_alpha_pair {
+	u32 brightness;
+	u32 alpha;
+};
+
 #if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
 struct lockdowninfo_cfg {
 	u8 lockdowninfo[16];
@@ -253,6 +259,9 @@ struct dsi_panel {
 	int panel_test_gpio;
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;
+
+	struct brightness_alpha_pair *fod_dim_lut;
+	u32 fod_dim_lut_count;
 
 #if defined(CONFIG_MACH_XIAOMI_SM8150)
 	bool cphy_esd_check;
@@ -384,6 +393,10 @@ void dsi_panel_ext_bridge_put(struct dsi_panel *panel);
 
 void dsi_panel_calc_dsi_transfer_time(struct dsi_host_common_cfg *config,
 		struct dsi_display_mode *mode, u32 frame_threshold_us);
+
+int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status);
+
+u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel);
 
 #if defined(CONFIG_MACH_XIAOMI_SM8150)
 int dsi_panel_set_esd_check(struct dsi_panel *panel);
