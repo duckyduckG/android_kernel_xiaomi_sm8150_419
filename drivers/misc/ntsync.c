@@ -59,7 +59,7 @@ struct ntsync_device {
  * Actually change the semaphore state, returning -EOVERFLOW if it is made
  * invalid.
  */
-static int post_sem_state(struct ntsync_obj *sem, __u32 count)
+static int release_sem_state(struct ntsync_obj *sem, __u32 count)
 {
 	__u32 sum;
 
@@ -73,7 +73,7 @@ static int post_sem_state(struct ntsync_obj *sem, __u32 count)
 	return 0;
 }
 
-static int ntsync_sem_post(struct ntsync_obj *sem, void __user *argp)
+static int ntsync_sem_release(struct ntsync_obj *sem, void __user *argp)
 {
 	__u32 __user *user_args = argp;
 	__u32 prev_count;
@@ -89,7 +89,7 @@ static int ntsync_sem_post(struct ntsync_obj *sem, void __user *argp)
 	spin_lock(&sem->lock);
 
 	prev_count = sem->u.sem.count;
-	ret = post_sem_state(sem, args);
+	ret = release_sem_state(sem, args);
 
 	spin_unlock(&sem->lock);
 
@@ -116,8 +116,8 @@ static long ntsync_obj_ioctl(struct file *file, unsigned int cmd,
 	void __user *argp = (void __user *)parm;
 
 	switch (cmd) {
-	case NTSYNC_IOC_SEM_POST:
-		return ntsync_sem_post(obj, argp);
+	case NTSYNC_IOC_SEM_RELEASE:
+		return ntsync_sem_release(obj, argp);
 	default:
 		return -ENOIOCTLCMD;
 	}
