@@ -40,6 +40,10 @@
 #include "pinctrl-msm.h"
 #include "../pinctrl-utils.h"
 
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+#include <soc/qcom/socinfo.h>
+#endif
+
 #define MAX_NR_GPIO 300
 #define PS_HOLD_OFFSET 0x820
 #define QUP_MASK       GENMASK(5, 0)
@@ -250,6 +254,12 @@ static int msm_config_group_get(struct pinctrl_dev *pctldev,
 	unsigned bit;
 	int ret;
 	u32 val;
+
+#if defined(CONFIG_MACH_XIAOMI_SM8150) && defined(CONFIG_MACH_XIAOMI_VAYU)
+	/* gpio 0~3 is NFC spi, gpio 126~129 is FP spi */
+	if (group < 4 || (group > 125 && group < 130))
+		return 0;
+#endif
 
 	g = &pctrl->soc->groups[group];
 
@@ -572,6 +582,11 @@ static void msm_gpio_dbg_show(struct seq_file *s, struct gpio_chip *chip)
 	unsigned i;
 
 	for (i = 0; i < chip->ngpio; i++, gpio++)
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+		/* gpio 0~3 is NFC spi, gpio 126~129 is FP spi */
+		if (i < 4 || (i > 125 && i < 130))
+			continue;
+#endif
 		msm_gpio_dbg_show_one(s, NULL, chip, i, gpio);
 }
 
