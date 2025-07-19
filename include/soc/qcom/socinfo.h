@@ -228,6 +228,10 @@ enum socinfo_parttype {
 
 #define SMEM_IMAGE_VERSION_TABLE	469
 #define SMEM_HW_SW_BUILD_ID		137
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+#define SMEM_ID_VENDOR1                 135
+#endif
+
 enum msm_cpu {
 	MSM_CPU_UNKNOWN = 0,
 	MSM_CPU_8960,
@@ -320,6 +324,32 @@ enum subset_cluster_type {
 	NUM_CLUSTERS_MAX,
 };
 
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+#define HARDWARE_PLATFORM_UNKNOWN 0
+#define HARDWARE_PLATFORM_VAYU 6
+
+#define HW_MAJOR_VERSION_SHIFT 16
+#define HW_MAJOR_VERSION_MASK  0xFFFF0000
+#define HW_MINOR_VERSION_SHIFT 0
+#define HW_MINOR_VERSION_MASK  0x0000FFFF
+#define HW_COUNTRY_VERSION_MASK 0xFFF00000
+#define HW_COUNTRY_VERSION_SHIFT 20
+#define HW_BUILD_VERSION_MASK 0x000F0000
+#define HW_BUILD_VERSION_SHIFT 16
+
+typedef enum {
+  CountryCN = 0,
+  CountryGlobal = 1,
+  CountryIndia = 2,
+  INVALID,
+} CountryType;
+
+uint32_t get_hw_version_platform(void);
+uint32_t get_hw_country_version(void);
+uint32_t get_hw_version_major(void);
+uint32_t get_hw_version_minor(void);
+uint32_t get_hw_version_build(void);
+#endif
 enum msm_cpu socinfo_get_msm_cpu(void);
 uint32_t socinfo_get_id(void);
 uint32_t socinfo_get_version(void);
@@ -334,6 +364,9 @@ uint32_t socinfo_get_cluster_info(enum subset_cluster_type cluster);
 bool socinfo_get_part_info(enum subset_part_type part);
 enum pmic_model socinfo_get_pmic_model(void);
 uint32_t socinfo_get_pmic_die_revision(void);
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+const char *product_name_get(void);
+#endif
 int __init socinfo_init(void) __must_check;
 int socinfo_get_feature_code(void);
 int socinfo_get_pcode(void);
