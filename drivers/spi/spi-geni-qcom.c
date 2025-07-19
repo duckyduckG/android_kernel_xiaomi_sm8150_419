@@ -21,7 +21,11 @@
 #include <linux/pinctrl/consumer.h>
 
 #define SPI_NUM_CHIPSELECT	(4)
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+#define SPI_XFER_TIMEOUT_MS	(1500)
+#else
 #define SPI_XFER_TIMEOUT_MS	(250)
+#endif
 #define SPI_AUTO_SUSPEND_DELAY	(100)
 /* SPI SE specific registers */
 #define SE_SPI_CPHA		(0x224)
@@ -1375,6 +1379,9 @@ static int spi_geni_transfer_one(struct spi_master *spi,
 				geni_se_rx_dma_unprep(mas->wrapper_dev,
 					xfer->rx_dma, xfer->len);
 		}
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+		mas->cur_xfer = NULL;
+#endif
 	} else {
 		mas->num_tx_eot = 0;
 		mas->num_rx_eot = 0;
