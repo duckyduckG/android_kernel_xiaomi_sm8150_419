@@ -27,6 +27,9 @@
 #define UFS_VENDOR_SKHYNIX     0x1AD
 #define UFS_VENDOR_WDC         0x145
 #define UFS_VENDOR_MICRON      0x12C
+#ifdef CONFIG_MACH_XIAOMI_SM8150
+#define UFS_VENDOR_SANDISK     0x0145
+#endif
 
 /**
  * ufs_dev_fix - ufs device quirk info
