@@ -20,6 +20,8 @@
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/log2.h>
+#include <linux/device.h>
+#include <linux/of_device.h>
 #include <asm/page.h>
 #include "trusty-log.h"
 
