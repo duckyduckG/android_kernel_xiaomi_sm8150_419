@@ -31,7 +31,6 @@
 #include <linux/regulator/driver.h>
 #include <linux/regulator/consumer.h>
 #include <linux/of_irq.h>
-#include <asm/bootinfo.h>
 #include <linux/of_platform.h>
 #include <linux/platform_device.h>
 
@@ -98,7 +97,6 @@ static const struct iio_buffer_setup_ops us_buffer_setup_ops = {
 };
 
 static const struct iio_trigger_ops us_sensor_trigger_ops = {
-	.owner = THIS_MODULE,
 };
 
 int us_setup_trigger_sensor(struct iio_dev *indio_dev)
@@ -186,7 +184,6 @@ static struct attribute_group us_prox_attribute_group = {
 };
 
 static const struct iio_info us_proximity_info = {
-	.driver_module = THIS_MODULE,
 	.attrs = &us_prox_attribute_group,
 };
 
