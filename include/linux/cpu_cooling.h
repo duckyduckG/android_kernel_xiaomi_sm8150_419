@@ -60,6 +60,9 @@ struct thermal_cooling_device *
 cpufreq_platform_cooling_register(struct cpufreq_policy *policy,
 					struct cpu_cooling_ops *ops);
 
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+void cpu_limits_set_level(unsigned int cpu, unsigned int max_freq);
+#endif
 /**
  * cpufreq_cooling_unregister - function to remove cpufreq cooling device.
  * @cdev: thermal cooling device pointer.
