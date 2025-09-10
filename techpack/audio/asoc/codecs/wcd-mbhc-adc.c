@@ -23,10 +23,17 @@
 #include <asoc/wcd-mbhc-v2.h>
 #include <asoc/pdata.h>
 
+#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#define WCD_MBHC_ADC_HS_THRESHOLD_MV    2600
+#define WCD_MBHC_ADC_HPH_THRESHOLD_MV   50
+#define WCD_MBHC_ADC_MICBIAS_MV         2700
+#define WCD_MBHC_FAKE_INS_RETRY         4
+#else
 #define WCD_MBHC_ADC_HS_THRESHOLD_MV    1700
 #define WCD_MBHC_ADC_HPH_THRESHOLD_MV   75
 #define WCD_MBHC_ADC_MICBIAS_MV         1800
 #define WCD_MBHC_FAKE_INS_RETRY         4
+#endif
 
 static int wcd_mbhc_get_micbias(struct wcd_mbhc *mbhc)
 {
@@ -570,18 +577,28 @@ static bool wcd_is_special_headset(struct wcd_mbhc *mbhc)
 static void wcd_mbhc_adc_update_fsm_source(struct wcd_mbhc *mbhc,
 				       enum wcd_mbhc_plug_type plug_type)
 {
+#ifndef CONFIG_MACH_XIAOMI_SM8150
 	bool micbias2;
+#endif
 
+#ifndef CONFIG_MACH_XIAOMI_SM8150
 	micbias2 = mbhc->mbhc_cb->micbias_enable_status(mbhc,
 							MIC_BIAS_2);
+#endif
 	switch (plug_type) {
 	case MBHC_PLUG_TYPE_HEADPHONE:
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_BTN_ISRC_CTL, 3);
 		break;
 	case MBHC_PLUG_TYPE_HEADSET:
 	case MBHC_PLUG_TYPE_ANC_HEADPHONE:
+#ifdef CONFIG_MACH_XIAOMI_SM8150
+		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_BTN_ISRC_CTL, 0);
+		mbhc->mbhc_cb->mbhc_micbias_control(mbhc->codec,
+				MIC_BIAS_2, MICB_PULLUP_ENABLE);
+#else
 		if (!mbhc->is_hs_recording && !micbias2)
 			WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_BTN_ISRC_CTL, 3);
+#endif
 		break;
 	default:
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_BTN_ISRC_CTL, 0);
@@ -772,6 +789,16 @@ correct_plug_type:
 		}
 
 		msleep(180);
+
+#ifdef CONFIG_MACH_XIAOMI_NABU
+		/* In the case of system bootup with headset pluged, mbhc
+		 * begin to detect without sound card registered. delay
+		 * about 150ms to wait sound card registe.
+		 */
+		if ((mbhc->mbhc_cfg->swap_gnd_mic == NULL) && (mbhc->mbhc_cfg->enable_usbc_analog))
+			msleep(600);
+#endif
+
 		/*
 		 * Use ADC single mode to minimize the chance of missing out
 		 * btn press/release for HEADSET type during correct work.
@@ -1056,8 +1083,13 @@ static irqreturn_t wcd_mbhc_adc_hs_rem_irq(int irq, void *data)
 		if (mbhc->mbhc_cb->hph_pa_on_status)
 			if (mbhc->mbhc_cb->hph_pa_on_status(mbhc->component)) {
 				hphpa_on = true;
+#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+				WCD_MBHC_REG_UPDATE_BITS(
+					WCD_MBHC_HPHR_PA_EN, 0);
+#else
 				WCD_MBHC_REG_UPDATE_BITS(
 					WCD_MBHC_HPH_PA_EN, 0);
+#endif
 			}
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_HPHR_GND, 1);
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_HPHL_GND, 1);
@@ -1100,7 +1132,11 @@ static irqreturn_t wcd_mbhc_adc_hs_rem_irq(int irq, void *data)
 
 		if (hphpa_on) {
 			hphpa_on = false;
+#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+			WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_HPHR_PA_EN, 3);
+#else
 			WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_HPH_PA_EN, 3);
+#endif
 		}
 	}
 exit:
