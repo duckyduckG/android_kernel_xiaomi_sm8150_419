@@ -95,7 +95,7 @@ static int cs35l41_i2c_remove(struct i2c_client *client)
 	regmap_write(cs35l41->regmap, CS35L41_IRQ1_MASK1, 0xFFFFFFFF);
 	wm_adsp2_remove(&cs35l41->dsp);
 	regulator_bulk_disable(cs35l41->num_supplies, cs35l41->supplies);
-	snd_soc_unregister_codec(cs35l41->dev);
+	snd_soc_unregister_component(cs35l41->dev);
 	return 0;
 }
 
