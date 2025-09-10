@@ -723,7 +723,7 @@ static int msm_routing_crus_sp_usecase_get(struct snd_kcontrol *kcontrol,
 static int msm_routing_crus_load_config_put(struct snd_kcontrol *kcontrol,
 					    struct snd_ctl_elem_value *ucontrol)
 {
-	struct snd_soc_platform *plat = snd_soc_kcontrol_platform(kcontrol);
+	struct snd_soc_component *plat = snd_soc_kcontrol_component(kcontrol);
 	const int crus_set = ucontrol->value.integer.value[0];
 	char config[CONFIG_FILE_SIZE];
 	const struct firmware *firmware;
@@ -788,7 +788,7 @@ static int
 msm_routing_crus_delta_config_put(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_value *ucontrol)
 {
-	struct snd_soc_platform *plat = snd_soc_kcontrol_platform(kcontrol);
+	struct snd_soc_component *plat = snd_soc_kcontrol_component(kcontrol);
 	struct crus_single_data_t data;
 	const int crus_set = ucontrol->value.integer.value[0];
 	const struct firmware *firmware;
@@ -1102,7 +1102,7 @@ static const struct snd_kcontrol_new crus_no_protect_controls[] = {
 		     msm_routing_crus_vol_attn_put),
 };
 
-void msm_crus_pb_add_controls(struct snd_soc_platform *platform)
+void msm_crus_pb_add_controls(struct snd_soc_component *component)
 {
 	if (this_ctrl.usecase_dt_count == 0)
 		pr_info("CRUS_SP: Usecase config not specified\n");
@@ -1111,12 +1111,12 @@ void msm_crus_pb_add_controls(struct snd_soc_platform *platform)
 	crus_sp_usecase_enum[0].texts = crus_sp_usecase_dt_text;
 
 	if (this_ctrl.prot_en)
-		snd_soc_add_platform_controls(
-			platform, crus_protect_controls,
+		snd_soc_add_component_controls(
+			component, crus_protect_controls,
 			ARRAY_SIZE(crus_protect_controls));
 	else
-		snd_soc_add_platform_controls(
-			platform, crus_no_protect_controls,
+		snd_soc_add_component_controls(
+			component, crus_no_protect_controls,
 			ARRAY_SIZE(crus_no_protect_controls));
 }
 

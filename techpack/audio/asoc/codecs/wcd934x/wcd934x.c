@@ -5895,12 +5895,12 @@ static int tavil_compander_put(struct snd_kcontrol *kcontrol,
 				(value ? 0x00:0x20));
 #ifdef CONFIG_MACH_XIAOMI_SM8150
 		/* Disable Compander Clock */
-		snd_soc_update_bits(codec, WCD934X_CDC_RX1_RX_PATH_CFG0, 0x02, 0x00);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER1_CTL0, 0x04, 0x04);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER1_CTL0, 0x02, 0x02);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER1_CTL0, 0x02, 0x00);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER1_CTL0, 0x01, 0x00);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER1_CTL0, 0x04, 0x00);
+		snd_soc_component_update_bits(component, WCD934X_CDC_RX1_RX_PATH_CFG0, 0x02, 0x00);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER1_CTL0, 0x04, 0x04);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER1_CTL0, 0x02, 0x02);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER1_CTL0, 0x02, 0x00);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER1_CTL0, 0x01, 0x00);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER1_CTL0, 0x04, 0x00);
 #endif
 		break;
 	case COMPANDER_2:
@@ -5908,12 +5908,12 @@ static int tavil_compander_put(struct snd_kcontrol *kcontrol,
 				(value ? 0x00:0x20));
 #ifdef CONFIG_MACH_XIAOMI_SM8150
 		/* Disable Compander Clock */
-		snd_soc_update_bits(codec, WCD934X_CDC_RX2_RX_PATH_CFG0, 0x02, 0x00);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER2_CTL0, 0x04, 0x04);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER2_CTL0, 0x02, 0x02);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER2_CTL0, 0x02, 0x00);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER2_CTL0, 0x01, 0x00);
-		snd_soc_update_bits(codec, WCD934X_CDC_COMPANDER2_CTL0, 0x04, 0x00);
+		snd_soc_component_update_bits(component, WCD934X_CDC_RX2_RX_PATH_CFG0, 0x02, 0x00);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER2_CTL0, 0x04, 0x04);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER2_CTL0, 0x02, 0x02);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER2_CTL0, 0x02, 0x00);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER2_CTL0, 0x01, 0x00);
+		snd_soc_component_update_bits(component, WCD934X_CDC_COMPANDER2_CTL0, 0x04, 0x00);
 #endif
 		break;
 	case COMPANDER_3:
@@ -6288,8 +6288,8 @@ static const struct soc_enum tavil_micbias_enum =
 static int tavil_micb_status_get(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
-	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-	struct tavil_priv *priv = snd_soc_codec_get_drvdata(codec);
+	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
+	struct tavil_priv *priv = snd_soc_component_get_drvdata(component);
 
 	ucontrol->value.integer.value[0] = priv->micbias_num;;
 
@@ -6299,15 +6299,15 @@ static int tavil_micb_status_get(struct snd_kcontrol *kcontrol,
 static int tavil_micb_status_put(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
-	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-	struct tavil_priv *priv = snd_soc_codec_get_drvdata(codec);
+	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
+	struct tavil_priv *priv = snd_soc_component_get_drvdata(component);
 	u8 tavil_micbias_num;
 
 	tavil_micbias_num = ucontrol->value.integer.value[0];
 
 	if (tavil_micbias_num >= sizeof(tavil_micbias_text)/
 	    sizeof(tavil_micbias_text[0])) {
-		dev_err(codec->dev,
+		dev_err(component->dev,
 			"%s: tavil_micbias_num = %d out of bounds\n",
 			__func__, tavil_micbias_num);
 		return -EINVAL;
@@ -6315,14 +6315,14 @@ static int tavil_micb_status_put(struct snd_kcontrol *kcontrol,
 	priv->micbias_num = tavil_micbias_num;
 
 	if (tavil_micbias_num == 0) {
-		tavil_codec_enable_standalone_micbias(codec, 1, false);
-		tavil_codec_enable_standalone_micbias(codec, 2, false);
-		tavil_codec_enable_standalone_micbias(codec, 3, false);
-		tavil_codec_enable_standalone_micbias(codec, 4, false);
-		dev_err(codec->dev, "====>PFT: %s: turn off all micbias.\n", __func__);
+		tavil_codec_enable_standalone_micbias(component, 1, false);
+		tavil_codec_enable_standalone_micbias(component, 2, false);
+		tavil_codec_enable_standalone_micbias(component, 3, false);
+		tavil_codec_enable_standalone_micbias(component, 4, false);
+		dev_err(component->dev, "====>PFT: %s: turn off all micbias.\n", __func__);
 	} else {
-		tavil_codec_enable_standalone_micbias(codec, tavil_micbias_num, true);
-		dev_err(codec->dev, "====>PFT: %s: turn on micbias %d.\n",
+		tavil_codec_enable_standalone_micbias(component, tavil_micbias_num, true);
+		dev_err(component->dev, "====>PFT: %s: turn on micbias %d.\n",
 				__func__, tavil_micbias_num);
 	}
 
@@ -6612,13 +6612,8 @@ static const struct snd_kcontrol_new tavil_snd_controls[] = {
 	SOC_ENUM_EXT("SPKR Right Boost Max State", tavil_spkr_boost_stage_enum,
 		     tavil_spkr_right_boost_stage_get,
 		     tavil_spkr_right_boost_stage_put),
-#ifdef CONFIG_MACH_XIAOMI_SM8150
 	SOC_SINGLE_TLV("HPHL Volume", WCD934X_HPH_L_EN, 0, 24, 1, line_gain),
 	SOC_SINGLE_TLV("HPHR Volume", WCD934X_HPH_R_EN, 0, 24, 1, line_gain),
-#else
-	SOC_SINGLE_TLV("HPHL Volume", WCD934X_HPH_L_EN, 0, 24, 1, line_gain),
-	SOC_SINGLE_TLV("HPHR Volume", WCD934X_HPH_R_EN, 0, 24, 1, line_gain),
-#endif
 	SOC_SINGLE_TLV("LINEOUT1 Volume", WCD934X_DIFF_LO_LO1_COMPANDER,
 		3, 16, 1, line_gain),
 	SOC_SINGLE_TLV("LINEOUT2 Volume", WCD934X_DIFF_LO_LO2_COMPANDER,

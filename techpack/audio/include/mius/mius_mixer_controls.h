@@ -97,7 +97,7 @@ struct mius_shared_data_block {
 
 struct mius_shared_data_block *mius_get_shared_obj(uint32_t object_id);
 
-extern unsigned int mius_add_platform_controls(void *platform);
+extern unsigned int mius_add_component_controls(void *component);
 
 void mius_set_calibration_data(uint8_t *calib_data, size_t size);
 
