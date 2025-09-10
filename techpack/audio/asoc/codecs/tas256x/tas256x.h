@@ -529,8 +529,7 @@ struct tas_device_ops {
 		struct tas256x_priv *p_tas256x,
 		int chn); /**< init typically for loading optimal settings */
 	int (*tas_probe)(struct tas256x_priv *p_tas256x,
-			 struct snd_soc_codec *codec, int chn);
-	//TODO:
+			 struct snd_soc_component *component, int chn);
 };
 
 struct tas_device {

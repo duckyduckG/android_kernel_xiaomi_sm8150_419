@@ -1463,7 +1463,7 @@ static int wcd937x_enable_req(struct snd_soc_dapm_widget *w,
 		snd_soc_component_update_bits(component,
 				WCD937X_ANA_TX_CH2, 0x40, 0x40);
 #if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
-		snd_soc_update_bits(codec, WCD937X_ANA_TX_CH3, 0x40, 0x40);
+		snd_soc_component_update_bits(component, WCD937X_ANA_TX_CH3, 0x40, 0x40);
 #endif
 		snd_soc_component_update_bits(component,
 				WCD937X_ANA_TX_CH3_HPF, 0x40, 0x40);
@@ -1478,7 +1478,7 @@ static int wcd937x_enable_req(struct snd_soc_dapm_widget *w,
 		snd_soc_component_update_bits(component,
 				WCD937X_ANA_TX_CH3, 0x80, 0x80);
 #if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
-		snd_soc_update_bits(codec, WCD937X_ANA_TX_CH3_HPF, 0x80, 0x80);
+		snd_soc_component_update_bits(component, WCD937X_ANA_TX_CH3_HPF, 0x80, 0x80);
 #endif
 		break;
 	case SND_SOC_DAPM_POST_PMD:
@@ -1489,7 +1489,7 @@ static int wcd937x_enable_req(struct snd_soc_dapm_widget *w,
 		snd_soc_component_update_bits(component,
 				WCD937X_ANA_TX_CH3, 0x80, 0x00);
 #if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
-		snd_soc_update_bits(codec, WCD937X_ANA_TX_CH3_HPF, 0x80, 0x00);
+		snd_soc_component_update_bits(component, WCD937X_ANA_TX_CH3_HPF, 0x80, 0x00);
 #endif
 		snd_soc_component_update_bits(component,
 				WCD937X_DIGITAL_CDC_DIG_CLK_CTL, 0x10, 0x00);

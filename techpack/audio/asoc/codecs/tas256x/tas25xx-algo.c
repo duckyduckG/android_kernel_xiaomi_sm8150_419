@@ -947,7 +947,7 @@ static const struct snd_kcontrol_new smartamp_tas25xx_mixer_controls[] = {
 };
 
 #if CODEC_CONTROL
-void tas_smartamp_add_algo_controls(struct snd_soc_codec *codec)
+void tas_smartamp_add_algo_controls(struct snd_soc_component *component)
 {
 	pr_err("TI-SmartPA: %s: Adding smartamp controls\n", __func__);
 
@@ -960,7 +960,7 @@ void tas_smartamp_add_algo_controls(struct snd_soc_codec *codec)
 	g_fmt = 0;
 
 	mutex_init(&routing_lock);
-	snd_soc_add_codec_controls(codec, smartamp_tas25xx_mixer_controls,
+	snd_soc_add_component_controls(component, smartamp_tas25xx_mixer_controls,
 				   ARRAY_SIZE(smartamp_tas25xx_mixer_controls));
 	tas_calib_init();
 }
@@ -988,9 +988,9 @@ void tas_smartamp_add_algo_controls_for_platform(
 EXPORT_SYMBOL(tas_smartamp_add_algo_controls_for_platform);
 #endif
 
-void tas_smartamp_remove_algo_controls(struct snd_soc_codec *codec)
+void tas_smartamp_remove_algo_controls(struct snd_soc_component *component)
 {
-	(void)codec;
+	(void)component;
 	tas_calib_exit();
 }
 EXPORT_SYMBOL(tas_smartamp_remove_algo_controls);

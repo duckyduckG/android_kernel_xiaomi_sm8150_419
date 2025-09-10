@@ -170,8 +170,8 @@ int tas25xx_smartamp_algo_ctrl(u8 *user_data, uint32_t param_id,
 			       uint8_t get_set, uint32_t length,
 			       uint32_t module_id);
 
-void tas_smartamp_add_algo_controls(struct snd_soc_codec *codec);
+void tas_smartamp_add_algo_controls(struct snd_soc_component *component);
 //void tas_smartamp_add_algo_controls_for_platform (struct snd_soc_platform *platform);
-void tas_smartamp_remove_algo_controls(struct snd_soc_codec *codec);
+void tas_smartamp_remove_algo_controls(struct snd_soc_component *component);
 bool tas25xx_set_iv_bit_fomat(int iv_data_with, int vbat, int update_now);
 #endif
