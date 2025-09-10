@@ -5788,7 +5788,7 @@ static int msm_routing_ec_ref_rx_put(struct snd_kcontrol *kcontrol,
 #else
 	if (state_rx || (!state_rx && wakeup_ext_ec_ref == 0 && voip_ext_ec_common_ref == 0)) {
 		pr_info("%s: update state!\n", __func__);
-		adm_ec_ref_rx_id(ec_ref_port_id);
+		adm_ec_ref_rx_id(msm_ec_ref_port_id);
 		mutex_unlock(&routing_lock);
 		snd_soc_dapm_mux_update_power(widget->dapm, kcontrol,
 						msm_route_ec_ref_rx, e, update);
@@ -7802,12 +7802,6 @@ static const struct snd_kcontrol_new quat_mi2s_rx_port_mixer_controls[] = {
 	MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
 	MSM_BACKEND_DAI_SLIMBUS_8_TX, 1, 0, msm_routing_get_port_mixer,
 	msm_routing_put_port_mixer),
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
-	SOC_DOUBLE_EXT("TX_CDC_DMA_TX_3", SND_SOC_NOPM,
-	MSM_BACKEND_DAI_TERTIARY_MI2S_RX,
-	MSM_BACKEND_DAI_TX_CDC_DMA_TX_3, 1, 0, msm_routing_get_port_mixer,
-	msm_routing_put_port_mixer),
-#endif
 };
 
 static const struct snd_kcontrol_new quin_mi2s_rx_port_mixer_controls[] = {
@@ -7914,6 +7908,12 @@ static const struct snd_kcontrol_new tert_mi2s_rx_port_mixer_controls[] = {
 	MSM_BACKEND_DAI_TERTIARY_MI2S_RX,
 	MSM_BACKEND_DAI_SLIMBUS_8_TX, 1, 0, msm_routing_get_port_mixer,
 	msm_routing_put_port_mixer),
+#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+	SOC_DOUBLE_EXT("TX_CDC_DMA_TX_3", SND_SOC_NOPM,
+	MSM_BACKEND_DAI_TERTIARY_MI2S_RX,
+	MSM_BACKEND_DAI_TX_CDC_DMA_TX_3, 1, 0, msm_routing_get_port_mixer,
+	msm_routing_put_port_mixer),
+#endif
 };
 
 static const struct snd_kcontrol_new sec_mi2s_rx_port_mixer_controls[] = {
@@ -24381,16 +24381,16 @@ static const struct soc_enum wsa_rx_0_vi_fb_lch_mux_enum =
 	wsa_rx_0_vi_fb_tx_lch_mux_text, wsa_rx_0_vi_fb_tx_lch_value);
 
 static const struct soc_enum wsa_rx_0_vi_fb_rch_mux_enum =
-#ifdef CONFIG_SND_SOC_TFA9874_FOR_DAVI
-	SOC_VALUE_ENUM_DOUBLE(SND_SOC_NOPM, PLATFORM_RX_VI_FB_MUX_ENUM, 0, 0,
-#else
 	SOC_VALUE_ENUM_DOUBLE(0, MSM_BACKEND_DAI_WSA_CDC_DMA_RX_0, 0, 0,
-#endif
 	ARRAY_SIZE(wsa_rx_0_vi_fb_tx_rch_mux_text),
 	wsa_rx_0_vi_fb_tx_rch_mux_text, wsa_rx_0_vi_fb_tx_rch_value);
 
 static const struct soc_enum mi2s_rx_vi_fb_mux_enum =
+#ifdef CONFIG_SND_SOC_TFA9874_FOR_DAVI
+	SOC_VALUE_ENUM_DOUBLE(0, PLATFORM_RX_VI_FB_MUX_ENUM, 0, 0,
+#else
 	SOC_VALUE_ENUM_DOUBLE(0, MSM_BACKEND_DAI_PRI_MI2S_RX, 0, 0,
+#endif
 	ARRAY_SIZE(mi2s_rx_vi_fb_tx_mux_text),
 	mi2s_rx_vi_fb_tx_mux_text, mi2s_rx_vi_fb_tx_value);
 
@@ -30775,7 +30775,6 @@ static const struct snd_soc_dapm_route intercon_mi2s[] = {
 	{"INT5_MI2S_TX", NULL, "BE_IN"},
 	{"SEC_MI2S_TX", NULL, "BE_IN"},
 	{"SENARY_MI2S_TX", NULL, "BE_IN"},
-
 #ifdef CONFIG_SND_SOC_TFA9874_FOR_DAVI
 	{PLATFORM_RX_VI_FB_MUX_NAME, PLATFORM_RX_VI_FB_TX_MUX_TEXT, PLATFORM_RX_VI_FB_TX_MUX_TEXT},
 #else
@@ -31844,11 +31843,11 @@ static int msm_routing_probe(struct snd_soc_component *component)
 			port_multi_channel_map_mixer_controls,
 			ARRAY_SIZE(port_multi_channel_map_mixer_controls));
 #ifdef CONFIG_MACH_XIAOMI_SM8150
-	elliptic_add_platform_controls(platform);
+	elliptic_add_component_controls(component);
 #endif
 	/* for mius start */
 #ifdef CONFIG_US_PROXIMITY
-	mius_add_platform_controls(platform);
+	mius_add_component_controls(component);
 #endif
 	/* for mius end */
 

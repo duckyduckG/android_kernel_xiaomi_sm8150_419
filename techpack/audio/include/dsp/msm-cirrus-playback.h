@@ -179,5 +179,5 @@ struct crus_control_t {
 //extern int afe_apr_send_pkt_crus(void *data, int index, int set);
 
 int crus_afe_callback(void *payload, int size);
-void msm_crus_pb_add_controls(struct snd_soc_platform *platform);
+void msm_crus_pb_add_controls(struct snd_soc_component *component);
 #endif /* _MSM_CIRRUS_PLAYBACK_H */

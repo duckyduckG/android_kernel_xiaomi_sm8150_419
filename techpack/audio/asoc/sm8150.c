@@ -3030,15 +3030,15 @@ static int usbhs_direction_get(struct snd_kcontrol *kcontrol,
 	else
 		ucontrol->value.integer.value[0] = 0;
 #else
-	struct snd_soc_codec *codec = NULL;
+	struct snd_soc_component *component = NULL;
 	struct snd_soc_card *card = NULL;
 	struct msm_asoc_mach_data *pdata = NULL;
 
 	ucontrol->value.integer.value[0] = 0;
 
-	codec = snd_soc_kcontrol_codec(kcontrol);
-	if (codec) {
-		card = codec->component.card;
+	component = snd_soc_kcontrol_component(kcontrol);
+	if (component) {
+		card = component->card;
 		if (card) {
 			pdata = snd_soc_card_get_drvdata(card);
 			if (pdata){
@@ -4104,8 +4104,8 @@ static bool msm_usbc_swap_gnd_mic(struct snd_soc_component *component,
 
 		/* if active and usbc_en2_gpio_p defined, swap using usbc_en2_gpio_p */
 		if (active) {
-			dev_dbg(codec->dev, "%s: enter\n", __func__);
-			oldv = tavil_mb_pull_down(codec, true, 0);
+			dev_dbg(component->dev, "%s: enter\n", __func__);
+			oldv = tavil_mb_pull_down(component, true, 0);
 			if (wcd_mbhc_cfg.usbc_analog_cfg.euro_us_hw_switch_gpio_p) {
 				value = gpio_get_value_cansleep(pdata->usbc_en2_gpio);
 				if (value)
@@ -4127,7 +4127,7 @@ static bool msm_usbc_swap_gnd_mic(struct snd_soc_component *component,
 				value = gpio_get_value_cansleep(pdata->usbc_en2_gpio);
 				gpio_set_value_cansleep(pdata->usbc_en2_gpio, !value);
 			}
-			tavil_mb_pull_down(codec, false, oldv);
+			tavil_mb_pull_down(component, false, oldv);
 			pr_info("%s: swap select switch %d to %d\n", __func__,
 				value, !value);
 			ret = true;
@@ -5230,7 +5230,7 @@ static int msm_mi2s_snd_startup(struct snd_pcm_substream *substream)
 		}
 	}
 #ifdef CONFIG_MACH_XIAOMI_SM8150
-	snd_soc_codec_set_sysclk(rtd->codec_dai->codec, 0, 0,
+	snd_soc_component_set_sysclk(rtd->codec_dai->component, 0, 0,
 			mi2s_clk[index].clk_freq_in_hz,
 			SND_SOC_CLOCK_IN);
 #endif
@@ -6859,6 +6859,7 @@ static struct snd_soc_dai_link quat_mi2s_rx_cs35l41_dai_links[] = {
 		.platform_name = "msm-pcm-routing",
 		.codecs = cs35l41_codec_components,
 		.num_codecs = ARRAY_SIZE(cs35l41_codec_components),
+		.dynamic_be = 1,
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id =  MSM_BACKEND_DAI_QUAT_TDM_RX_0,
@@ -6877,6 +6878,7 @@ static struct snd_soc_dai_link quat_mi2s_rx_tas2557_dai_links[] = {
 		.platform_name = "msm-pcm-routing",
 		.codec_name = "tas2557.1-004c",
 		.codec_dai_name = "tas2557 ASI1",
+		.dynamic_be = 1,
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
@@ -6895,6 +6897,7 @@ static struct snd_soc_dai_link quat_mi2s_rx_tfa9874_dai_links[] = {
 		.platform_name = "msm-pcm-routing",
 		.codec_name = "tfa98xx.1-0034",
 		.codec_dai_name = "tfa98xx-aif-1-34",
+		.dynamic_be = 1,
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
@@ -6913,6 +6916,7 @@ static struct snd_soc_dai_link quat_mi2s_rx_cs35l41_dai_links[] = {
 		.platform_name = "msm-pcm-routing",
 		.codec_name = CS35L41_CODEC_NAME,
 		.codec_dai_name = "cs35l41-pcm",
+		.dynamic_be = 1,
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,

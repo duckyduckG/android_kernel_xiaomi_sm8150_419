@@ -826,7 +826,7 @@ static void wcd_clsh_state_hph_ear(struct snd_soc_component *component,
 			wcd_clsh_set_flyback_mode(component, mode);
 			wcd_clsh_set_buck_mode(component, mode);
 #ifdef CONFIG_MACH_XIAOMI_SM8150
-			wcd_clsh_set_hph_mode(codec, mode);
+			wcd_clsh_set_hph_mode(component, mode);
 #endif
 		}
 	} else {
