@@ -179,6 +179,9 @@ struct swr_mstr_ctrl {
 	struct clk *lpass_core_audio;
 	u8 num_usecase;
 	u32 swr_irq_wakeup_capable;
+#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+	bool swr_tx_wakeup_capable;
+#endif
 	int hw_core_clk_en;
 	int aud_core_clk_en;
 	int clk_src;
