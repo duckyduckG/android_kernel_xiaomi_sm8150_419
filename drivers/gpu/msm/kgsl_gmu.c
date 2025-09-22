@@ -1262,7 +1262,7 @@ static void gmu_acd_probe(struct kgsl_device *device, struct gmu_device *gmu,
 	u32 acd_level, cmd_idx, numlvl = pwr->num_pwrlevels;
 	int ret, i;
 
-	if (!ADRENO_FEATURE(ADRENO_DEVICE(device), ADRENO_ACD))
+	if ((!ADRENO_FEATURE(ADRENO_DEVICE(device), ADRENO_ACD)) || (adreno_is_a640v2(ADRENO_DEVICE(device))))
 		return;
 
 	cmd->hdr = 0xFFFFFFFF;
@@ -1282,6 +1282,43 @@ static void gmu_acd_probe(struct kgsl_device *device, struct gmu_device *gmu,
 		return;
 
 	cmd->num_levels = cmd_idx;
+
+	ret = gmu_aop_mailbox_init(device, gmu);
+	if (ret)
+		dev_err(&gmu->pdev->dev,
+			"AOP mailbox init failed: %d\n", ret);
+}
+
+static void gmu_acd_probe_legacy(struct kgsl_device *device, struct gmu_device *gmu,
+		struct device_node *node)
+{
+	struct kgsl_pwrctrl *pwr = &device->pwrctrl;
+	struct hfi_acd_table_cmd *cmd = &gmu->hfi.acd_tbl_cmd;
+	u32 *acd_level_array;
+	u32 cmd_idx, numlvl = pwr->num_pwrlevels;
+	int ret, i;
+
+	if (!ADRENO_FEATURE(ADRENO_DEVICE(device), ADRENO_ACD))
+		return;
+
+	cmd->hdr = 0xFFFFFFFF;
+	cmd->version = HFI_ACD_INIT_VERSION;
+	cmd->stride = 2;
+	cmd->enable_by_level = 0;
+
+	for (i = 0, cmd_idx = 0; i < numlvl; i++) {
+		acd_level_array = pwr->pwrlevels[numlvl - i - 1].acd_level_array;
+		if (acd_level_array[0] && acd_level_array[1]) {
+			cmd->enable_by_level |= (1 << i);
+			cmd->data[cmd_idx++] = acd_level_array[0];
+			cmd->data[cmd_idx++] = acd_level_array[1];
+		}
+	}
+
+	if (!cmd->enable_by_level)
+		return;
+
+	cmd->num_levels = cmd_idx/2;
 
 	ret = gmu_aop_mailbox_init(device, gmu);
 	if (ret)
@@ -1404,7 +1441,12 @@ static int gmu_probe(struct kgsl_device *device, struct device_node *node)
 	else
 		gmu->idle_level = GPU_HW_ACTIVE;
 
-	gmu_acd_probe(device, gmu, node);
+	if (of_property_read_bool(node, "qcom,enable-legacy-acd-support")) {
+		dev_info(&gmu->pdev->dev, "Using legacy ACD array support\n");
+		gmu_acd_probe_legacy(device, gmu, node);
+	} else {
+		gmu_acd_probe(device, gmu, node);
+	}
 
 	set_bit(GMU_ENABLED, &device->gmu_core.flags);
 	device->gmu_core.dev_ops = &adreno_a6xx_gmudev;
