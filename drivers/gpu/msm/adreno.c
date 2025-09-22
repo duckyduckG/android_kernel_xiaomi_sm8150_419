@@ -1020,8 +1020,14 @@ static int adreno_of_parse_pwrlevels(struct adreno_device *adreno_dev,
 			&level->gpu_freq))
 			return -EINVAL;
 
+		if (of_property_read_u32_array(child, "qcom,acd-level",
+				level->acd_level_arr, 2) != 0) {
+				level->acd_level_arr[0] = 0;
+				level->acd_level_arr[1] = 0;
+
 		of_property_read_u32(child, "qcom,acd-level",
 			&level->acd_level);
+		}
 
 		ret = kgsl_of_property_read_ddrtype(child,
 			"qcom,bus-freq", &level->bus_freq);

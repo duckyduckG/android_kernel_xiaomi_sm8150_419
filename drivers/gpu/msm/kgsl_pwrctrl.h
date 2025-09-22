@@ -112,6 +112,7 @@ struct kgsl_pwrlevel {
 	unsigned int bus_min;
 	unsigned int bus_max;
 	unsigned int acd_level;
+	u32 acd_level_arr[2];
 };
 
 struct kgsl_regulator {

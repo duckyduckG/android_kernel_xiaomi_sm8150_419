@@ -1260,28 +1260,46 @@ static void gmu_acd_probe(struct kgsl_device *device, struct gmu_device *gmu,
 	struct kgsl_pwrctrl *pwr = &device->pwrctrl;
 	struct hfi_acd_table_cmd *cmd = &gmu->hfi.acd_tbl_cmd;
 	u32 acd_level, cmd_idx, numlvl = pwr->num_pwrlevels;
+	u32 *acd_level_arr;
+	u32 stride = 1;
 	int ret, i;
 
 	if (!ADRENO_FEATURE(ADRENO_DEVICE(device), ADRENO_ACD))
 		return;
 
+	for (i = 0; i < numlvl; i++) {
+		if (pwr->pwrlevels[i].acd_level_arr[1]) {
+			stride = 2;
+			break;
+		}
+	}
+
 	cmd->hdr = 0xFFFFFFFF;
 	cmd->version = HFI_ACD_INIT_VERSION;
-	cmd->stride = 1;
+	cmd->stride = stride;
 	cmd->enable_by_level = 0;
 
 	for (i = 0, cmd_idx = 0; i < numlvl; i++) {
-		acd_level = pwr->pwrlevels[numlvl - i - 1].acd_level;
-		if (acd_level) {
-			cmd->enable_by_level |= (1 << i);
-			cmd->data[cmd_idx++] = acd_level;
+		if (stride == 2) {
+			acd_level_arr = pwr->pwrlevels[numlvl - i - 1].acd_level_arr;
+			if (acd_level_arr[0] && acd_level_arr[1]) {
+				cmd->enable_by_level |= (1 << i);
+				cmd->data[cmd_idx++] = acd_level_arr[0];
+				cmd->data[cmd_idx++] = acd_level_arr[1];
+			}
+		} else {
+			acd_level = pwr->pwrlevels[numlvl - i - 1].acd_level;
+			if (acd_level) {
+				cmd->enable_by_level |= (1 << i);
+				cmd->data[cmd_idx++] = acd_level;
+			}
 		}
 	}
 
 	if (!cmd->enable_by_level)
 		return;
 
-	cmd->num_levels = cmd_idx;
+	cmd->num_levels = cmd_idx/stride;
 
 	ret = gmu_aop_mailbox_init(device, gmu);
 	if (ret)
