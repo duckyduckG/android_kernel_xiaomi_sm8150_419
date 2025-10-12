@@ -165,9 +165,14 @@ enum haptics_custom_effect_param {
 	CUSTOM_DATA_LEN,
 };
 enum aw8697_haptic_strength {
+#if defined(CONFIG_MACH_XIAOMI)
+	AW8697_STRONG_MAGNITUDE = 0x7FFF,
+	AW8697_LIGHT_MAGNITUDE = 0x3FFF,
+#else
 	AW8697_LIGHT_MAGNITUDE = 0x3fff,
 	AW8697_MEDIUM_MAGNITUDE = 0x5fff,
 	AW8697_STRONG_MAGNITUDE = 0x7fff,
+#endif
 };
 /*********************************************************
  *

@@ -1371,7 +1371,7 @@ static int16_t aw8697_haptic_effect_strength(struct aw8697 *aw8697)
 {
 	pr_debug("%s enter\n", __func__);
 	pr_debug("%s: aw8697->play.vmax_mv =0x%x\n", __func__, aw8697->play.vmax_mv);
-#if 0
+#if !defined(CONFIG_MACH_XIAOMI)
 	switch (aw8697->play.vmax_mv) {
 	case AW8697_LIGHT_MAGNITUDE:
 		aw8697->level = 0x80;
@@ -1386,14 +1386,19 @@ static int16_t aw8697_haptic_effect_strength(struct aw8697 *aw8697)
 		break;
 	}
 #else
-	if (aw8697->play.vmax_mv >= 0x7FFF)
+	switch (aw8697->play.vmax_mv) {
+	case AW8697_STRONG_MAGNITUDE:
 		aw8697->level = 0x80; /*128*/
-	else if (aw8697->play.vmax_mv <= 0x3FFF)
+		break;
+	case AW8697_LIGHT_MAGNITUDE:
 		aw8697->level = 0x1E; /*30*/
-    else
-	aw8697->level = (aw8697->play.vmax_mv - 16383) / 128;
-	if( aw8697->level < 0x1E)
-		aw8697->level = 0x1E; /*30*/
+		break;
+	default:
+		aw8697->level = (aw8697->play.vmax_mv - 16383) / 128;
+		if(aw8697->level < 0x1E)
+			aw8697->level = 0x1E; /*30*/
+		break;
+	}
 #endif
 
 	pr_info("%s: aw8697->level =0x%x\n", __func__, aw8697->level);
