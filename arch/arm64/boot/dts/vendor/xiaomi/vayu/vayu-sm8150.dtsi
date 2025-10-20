@@ -3,7 +3,7 @@ this file is for attribution only of vayu
 And public attribution of xiaomi platforms(like J20S and so and)
 */
 #include "vayu-pinctrl.dtsi"
-#include "xiaomi-sm8150-common.dtsi"
+#include "../common/xiaomi-sm8150-common.dtsi"
 #include "vayu-sm8150-camera-sensor-mtp.dtsi"
 
 &ufshc_mem {
@@ -15,11 +15,7 @@ And public attribution of xiaomi platforms(like J20S and so and)
 	vccq-max-microamp = <700000>;
 };
 
-&qupv3_se4_i2c {
-#include "smb1390.dtsi"
-};
-
-
+#include "../common/smb1390.dtsi"
 
 &pm8150b_fg {
 	qcom,battery-data = <&vayu_batterydata>;
@@ -261,8 +257,8 @@ And public attribution of xiaomi platforms(like J20S and so and)
 	};
 	vayu_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
-		#include "fg-gen4-batterydata-vayu-NVT-5160mah.dtsi"
-		#include "fg-gen4-batterydata-vayu-sunwoda-5160mah.dtsi"
+		#include "./battery/fg-gen4-batterydata-vayu-NVT-5160mah.dtsi"
+		#include "./battery/fg-gen4-batterydata-vayu-sunwoda-5160mah.dtsi"
 	};
 
 	maxim_ds28e16: maxim_ds28e16 {
@@ -418,32 +414,6 @@ And public attribution of xiaomi platforms(like J20S and so and)
 		enable-active-high;
 		regulator-boot-on;
 		gpio = <&tlmm 21 0>;
-	};
-
-	dsi_amoled_panel_pwr_external_supply: dsi_amoled_panel_pwr_external_supply {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		qcom,panel-supply-entry@0 {
-			reg = <0>;
-			qcom,supply-name = "vddio";
-			qcom,supply-min-voltage = <1800000>;
-			qcom,supply-max-voltage = <1800000>;
-			qcom,supply-enable-load = <62000>;
-			qcom,supply-disable-load = <80>;
-			//qcom,supply-post-on-sleep = <20>;
-		};
-
-		qcom,panel-supply-entry@1 {
-			reg = <1>;
-			qcom,supply-name = "vcie";
-			qcom,supply-min-voltage = <3000000>;
-			qcom,supply-max-voltage = <3000000>;
-			qcom,supply-enable-load = <62000>;
-			qcom,supply-disable-load = <80>;
-			qcom,supply-post-on-sleep = <10>;
-			qcom,supply-pre-off-sleep = <10>;
-		};
 	};
 
 	fingerprint_goodix {
