@@ -7,3 +7,7 @@ endif
 ifneq "$(wildcard $(vendor)/qcom_legacy)" ""
 	subdir-y += qcom_legacy
 endif
+
+ifneq "$(wildcard $(vendor)/xiaomi)" ""
+	subdir-y += xiaomi
+endif
