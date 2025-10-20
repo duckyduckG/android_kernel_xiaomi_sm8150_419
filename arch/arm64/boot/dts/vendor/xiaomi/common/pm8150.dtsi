@@ -29,7 +29,3 @@
 		};
 	};
 };
-
-&pm8150_rtc {
-	qcom,qpnp-rtc-alarm-pwrup = <1>;
-};
