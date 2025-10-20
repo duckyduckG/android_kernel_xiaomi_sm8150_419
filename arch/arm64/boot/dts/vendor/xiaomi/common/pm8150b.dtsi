@@ -27,6 +27,9 @@
 };
 
 &thermal_zones {
+	pm8150b-wp-therm {
+		disable-thermal-zone;
+	};
 	soc {
 		disable-thermal-zone;
 	};
