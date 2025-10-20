@@ -268,6 +268,10 @@
 	qcom,platform-reset-gpio = <&tlmm 6 0>;
 };
 
+&sde_dsi {
+	qcom,dsi-default-panel = <&dsi_sim_vid>;
+};
+
 &qupv3_se9_i2c {
 	status = "ok";
 	nq@28 {
@@ -289,9 +293,6 @@
 	};
 };
 
-&dsi_sim_vid_display {
-	qcom,dsi-display-active;
-};
 
 &ufsphy_mem {
 	compatible = "qcom,ufs-phy-qmp-v4";

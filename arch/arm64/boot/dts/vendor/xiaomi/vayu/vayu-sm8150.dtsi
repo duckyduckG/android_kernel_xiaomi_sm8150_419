@@ -1501,10 +1501,12 @@ And public attribution of xiaomi platforms(like J20S and so and)
 };
 
 &dsi_j20s_36_02_0a_video {
+	qcom,ulps-enabled;
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
 };
 
 &dsi_j20s_42_02_0b_video {
+	qcom,ulps-enabled;
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
 };
 
