@@ -10,6 +10,36 @@ LINUXINCLUDE    += \
 		-include $(srctree)/techpack/camera-msmnile/config/msmnilecameraconf.h
 endif
 
+# auto-detect subdirs
+ifeq ($(CONFIG_MACH_XIAOMI_CEPHEUS), y)
+include $(srctree)/techpack/camera-msmnile/config/cepheus.conf
+endif
+
+ifeq ($(CONFIG_MACH_XIAOMI_CEPHEUS), y)
+LINUXINCLUDE    += \
+		-include $(srctree)/techpack/camera-msmnile/config/cepheus.h
+endif
+
+# auto-detect subdirs
+ifeq ($(CONFIG_MACH_XIAOMI_CRUX), y)
+include $(srctree)/techpack/camera-msmnile/config/crux.conf
+endif
+
+ifeq ($(CONFIG_MACH_XIAOMI_CRUX), y)
+LINUXINCLUDE    += \
+		-include $(srctree)/techpack/camera-msmnile/config/crux.h
+endif
+
+# auto-detect subdirs
+ifeq ($(CONFIG_MACH_XIAOMI_ANDROMEDA), y)
+include $(srctree)/techpack/camera-msmnile/config/crux.conf
+endif
+
+ifeq ($(CONFIG_MACH_XIAOMI_ANDROMEDA), y)
+LINUXINCLUDE    += \
+		-include $(srctree)/techpack/camera-msmnile/config/crux.h
+endif
+
 ifdef CONFIG_SPECTRA_CAMERA_MSMNILE
 # Use USERINCLUDE when you must reference the UAPI directories only.
 USERINCLUDE     += \
