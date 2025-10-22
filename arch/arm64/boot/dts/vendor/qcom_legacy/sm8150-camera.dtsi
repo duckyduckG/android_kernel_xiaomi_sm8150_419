@@ -322,6 +322,7 @@
 				<&apps_smmu 0xC60 0x620>,
 				<&apps_smmu 0xE40 0x620>,
 				<&apps_smmu 0xE60 0x620>;
+			qcom,iommu-faults = "non-fatal";
 			qcom,iommu-dma-addr-pool = <0x7400000 0xd8c00000>;
 			label = "ife";
 			ife_iova_mem_map: iova-mem-map {
@@ -340,6 +341,7 @@
 			compatible = "qcom,msm-cam-smmu-cb";
 			iommus = <&apps_smmu 0x1180 0x20>,
 				<&apps_smmu 0x11A0 0x20>;
+			qcom,iommu-faults = "non-fatal";
 			qcom,iommu-dma-addr-pool = <0x7400000 0xd8c00000>;
 			label = "jpeg";
 			jpeg_iova_mem_map: iova-mem-map {
@@ -369,6 +371,7 @@
 				<&apps_smmu 0x1120 0x20>,
 				<&apps_smmu 0x10C0 0x0>,
 				<&apps_smmu 0x1140 0x0>;
+			qcom,iommu-faults = "non-fatal";
 			qcom,iommu-dma-addr-pool = <0x10c00000 0xcf300000>;
 			label = "icp";
 			icp_iova_mem_map: iova-mem-map {
@@ -423,6 +426,7 @@
 		msm_cam_smmu_cpas_cdm {
 			compatible = "qcom,msm-cam-smmu-cb";
 			iommus = <&apps_smmu 0x1000 0x0>;
+			qcom,iommu-faults = "non-fatal";
 			qcom,iommu-dma-addr-pool = <0x7400000 0xd8c00000>;
 			label = "cpas-cdm0";
 			cpas_cdm_iova_mem_map: iova-mem-map {
@@ -447,6 +451,7 @@
 			compatible = "qcom,msm-cam-smmu-cb";
 			iommus = <&apps_smmu 0x11C0 0x20>,
 				<&apps_smmu 0x11E0 0x20>;
+			qcom,iommu-faults = "non-fatal";
 			qcom,iommu-dma-addr-pool = <0x7400000 0xd8c00000>;
 			label = "fd";
 			fd_iova_mem_map: iova-mem-map {
@@ -465,6 +470,7 @@
 			compatible = "qcom,msm-cam-smmu-cb";
 			iommus = <&apps_smmu 0x10e0 0x0>,
 				<&apps_smmu 0x1160 0x0>;
+			qcom,iommu-faults = "non-fatal";
 			qcom,iommu-dma-addr-pool = <0x7400000 0xd8c00000>;
 			label = "lrme";
 			lrme_iova_mem_map: iova-mem-map {
