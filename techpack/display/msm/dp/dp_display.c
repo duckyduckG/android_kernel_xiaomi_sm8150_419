@@ -2712,6 +2712,11 @@ static int dp_display_init_aux_switch(struct dp_display_private *dp)
 		goto end;
 	}
 
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+	DP_WARN("FSA4480 AUX switch callback disabled For Xiaomi-SM8150\n");
+	goto end;
+#endif
+
 	dp->aux_switch_node = of_parse_phandle(dp->pdev->dev.of_node,
 			phandle, 0);
 	if (!dp->aux_switch_node) {
