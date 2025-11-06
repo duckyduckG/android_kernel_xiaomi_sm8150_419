@@ -286,7 +286,7 @@ And public attribution of xiaomi platforms(like J20S and so and)
 		ti,bypass-tmax = <0>;
 	};
 
-	fsa4480@42 {
+	fsa4480@43 {
 		status = "disabled";
 	};
 
