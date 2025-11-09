@@ -23,7 +23,7 @@
 #include <linux/of.h>
 #include <linux/spi/spi.h>
 #include <linux/uaccess.h>
-#include <linux/platform_device.h>
+#include <linux/spi/spi.h>
 #include <linux/sysfs.h>
 #include <linux/workqueue.h>
 
@@ -50,6 +50,7 @@
 
 /* ---SPI driver info.--- */
 #define NVT_SPI_NAME "NVT-ts-spi"
+
 #define NVT_LOG(fmt, args...)	pr_info("[%s] %s %d: " fmt, NVT_SPI_NAME, __func__, __LINE__, ##args)
 #define NVT_ERR(fmt, args...)	pr_err("[%s] %s %d: " fmt, NVT_SPI_NAME, __func__, __LINE__, ##args)
 
@@ -110,7 +111,6 @@ enum nvt_ic_state {
 
 struct nvt_ts_data {
 	struct spi_device *client;
-	struct platform_device *pdev;
 	struct input_dev *input_dev;
 	struct delayed_work nvt_fwu_work;
 	struct delayed_work nvt_lockdown_work;
@@ -139,7 +139,7 @@ struct nvt_ts_data {
 	uint8_t carrier_system;
 	uint8_t hw_crc;
 	uint16_t nvt_pid;
-	uint8_t rbuf[1025];
+	uint8_t *rbuf;
 	uint8_t *xbuf;
 	struct mutex xbuf_lock;
 	bool irq_enabled;
@@ -204,6 +204,7 @@ typedef enum {
 
 #define DUMMY_BYTES (1)
 #define NVT_TRANSFER_LEN	(63*1024)
+#define NVT_READ_LEN		(2*1024)
 
 typedef enum {
 	NVTWRITE = 0,
