@@ -28,7 +28,6 @@
 #include <linux/of_gpio.h>
 #include <linux/of_irq.h>
 #include <linux/debugfs.h>
-#include "../spi-xiaomi-tp.h"
 #include <linux/init.h>
 #include <linux/notifier.h>
 
