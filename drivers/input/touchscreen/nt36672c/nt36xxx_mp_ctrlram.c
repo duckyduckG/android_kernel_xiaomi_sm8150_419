@@ -1469,7 +1469,7 @@ return:
 *******************************************************/
 static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 {
-	struct device_node *np = ts->pdev->dev.of_node;
+	struct device_node *np = ts->client->dev.of_node;
 	unsigned char mpcriteria[32] = {0};
 #if NVT_TOUCH_MP_SETTING_CRITERIA_FROM_CSV
 	char mp_setting_criteria_csv_filename[64] = {0};
