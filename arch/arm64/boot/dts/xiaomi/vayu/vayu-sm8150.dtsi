@@ -575,20 +575,12 @@ And public attribution of xiaomi platforms(like J20S and so and)
 	};
 };
 
-&qupv3_se17_spi {
-		status = "ok";
-		touch_spi@0 {
-				compatible = "xiaomi,spi-for-tp";
-				reg = <0>;
-				status = "ok";
-				spi-max-frequency = <10000000>;  //10M
-		};
-};
-
 /* Novatek device tree node */
-&soc {
-	ts_novatek {
+&qupv3_se17_spi {
+	status = "ok";
+	ts_novatek@0 {
 		compatible = "novatek,NVT-ts-spi";
+		reg = <0>;
 		status = "ok";
 		spi-max-frequency = <10000000>;  /*4800000,9600000,15000000,19200000 10M*/
 		novatek,reset-gpio = <&tlmm 12 0x00>;
