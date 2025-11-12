@@ -76,6 +76,9 @@
 #define MT_PROTOCOL_B 1
 #define WAKEUP_GESTURE 1
 
+/* ---Lockdown Info Support.--- */
+#define LOCKDOWN_INFO_SUPPORT 1
+
 #define BOOT_UPDATE_FIRMWARE 1
 #define DEFAULT_BOOT_UPDATE_FIRMWARE_FIRST "j20s_novatek_ts_fw01.bin"
 #define DEFAULT_MP_UPDATE_FIRMWARE_FIRST   "j20s_novatek_ts_mp01.bin"
