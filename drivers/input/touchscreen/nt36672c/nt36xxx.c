@@ -78,11 +78,32 @@ static int nvt_drm_notifier_callback(struct notifier_block *self, unsigned long 
 #endif
 static int32_t nvt_ts_suspend(struct device *dev);
 static int32_t nvt_ts_resume(struct device *dev);
+#if !LOCKDOWN_INFO_SUPPORT
 extern int dsi_panel_lockdown_info_read(unsigned char *plockdowninfo);
+#endif
 extern void dsi_panel_doubleclick_enable(bool on);
 uint32_t ENG_RST_ADDR  = 0x7FFF80;
 uint32_t SWRST_N8_ADDR = 0; /* read from dtsi */
 uint32_t SPI_RD_FAST_ADDR = 0; /* read from dtsi */
+
+
+#if LOCKDOWN_INFO_SUPPORT
+/*******************************************************
+Description:
+	Panel Lockdown Info table start.
+*******************************************************/
+static const unsigned char lockdown_info_tianma[8] = {
+	0x46, 0x36, 0x32, 0x01, 0x4A, 0x14, 0x31, 0x00
+};
+
+static const unsigned char lockdown_info_huaxing[8] = {
+	0x53, 0x42, 0x32, 0x01, 0x4A, 0x14, 0x32, 0x00
+};
+/*******************************************************
+Description:
+	Panel Lockdown Info table end.
+*******************************************************/
+#endif
 
 static ssize_t nvt_cg_color_show(struct device *dev,
 					struct device_attribute *attr, char *buf)
@@ -1083,6 +1104,24 @@ static bool nvt_cmds_panel_info(void)
 	}
 	return panel_id;
 }
+
+#if LOCKDOWN_INFO_SUPPORT
+static int dsi_panel_lockdown_info_read(unsigned char *plockdowninfo)
+{
+	if (!plockdowninfo) {
+		NVT_ERR("invalid params\n");
+		return -EINVAL;
+	}
+	if (nvt_cmds_panel_info()) {
+		NVT_LOG("%s: tianma panel detected\n", __func__);
+		memcpy(plockdowninfo, lockdown_info_tianma, ARRAY_SIZE(lockdown_info_tianma));
+	} else {
+		NVT_LOG("%s: huaxing panel detected\n", __func__);
+		memcpy(plockdowninfo, lockdown_info_huaxing, ARRAY_SIZE(lockdown_info_huaxing));
+	}
+	return 0;
+}
+#endif
 
 static int nvt_get_panel_type(struct nvt_ts_data *ts_data)
 {
@@ -2132,6 +2171,10 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 
 	bTouchIsAwake = 1;
 	NVT_LOG("end\n");
+
+#if LOCKDOWN_INFO_SUPPORT
+	nvt_cmds_panel_info();
+#endif
 
 	nvt_irq_enable(true);
 
