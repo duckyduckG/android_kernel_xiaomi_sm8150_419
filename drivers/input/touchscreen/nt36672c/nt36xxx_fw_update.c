@@ -18,11 +18,9 @@
 
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
-#include <linux/delay.h>
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 
-#include <linux/delay.h>
 #include <linux/firmware.h>
 #include <linux/gpio.h>
 
@@ -41,7 +39,7 @@
 #define NVT_DUMP_PARTITION_LEN		(1024)
 #define NVT_DUMP_PARTITION_PATH		"/data/local/tmp"
 
-struct timeval start, end;
+static ktime_t start, end;
 const struct firmware *fw_entry = NULL;
 static size_t fw_need_write_size = 0;
 static uint8_t *fwbuf = NULL;
@@ -914,7 +912,7 @@ static int32_t nvt_download_firmware_hw_crc(void)
 	uint8_t retry = 0;
 	int32_t ret = 0;
 
-	do_gettimeofday(&start);
+	start = ktime_get();
 
 	while (1) {
 		/* bootloader reset to reset MCU */
@@ -969,7 +967,7 @@ fail:
 		}
 	}
 
-	do_gettimeofday(&end);
+	end = ktime_get();
 
 	return ret;
 }
@@ -987,7 +985,7 @@ static int32_t nvt_download_firmware(void)
 	uint8_t retry = 0;
 	int32_t ret = 0;
 
-	do_gettimeofday(&start);
+	start = ktime_get();
 
 	while (1) {
 		/*
@@ -1048,7 +1046,7 @@ fail:
 		}
 	}
 
-	do_gettimeofday(&end);
+	end = ktime_get();
 
 	return ret;
 }
@@ -1089,7 +1087,7 @@ int32_t nvt_update_firmware(const char *firmware_name)
 	}
 
 	NVT_LOG("Update firmware success! <%ld us>\n",
-			(end.tv_sec - start.tv_sec)*1000000L + (end.tv_usec - start.tv_usec));
+			(long) ktime_us_delta(end, start));
 
 	/* Get FW Info */
 	ret = nvt_get_fw_info();
