@@ -1,0 +1,1 @@
+source "drivers/input/touchscreen/xiaomi/nt36672c/Kconfig"
