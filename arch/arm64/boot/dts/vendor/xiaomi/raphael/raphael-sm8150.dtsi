@@ -536,6 +536,13 @@ And public attribution of xiaomi platforms(like F1 and so and)
 };
 
 &pm8150l_adc_tm {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	io-channels = <&pm8150l_vadc ADC_AMUX_THM1_PU2>,
+			<&pm8150l_vadc ADC_AMUX_THM2_PU2>,
+			<&pm8150l_vadc ADC_AMUX_THM3_PU2>;
+
 	cam_therm0 {
 		reg = <ADC_AMUX_THM1_PU2>;
 		qcom,ratiometric;
