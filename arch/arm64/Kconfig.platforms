@@ -483,4 +483,10 @@ config MACH_XIAOMI_VAYU
 	help
 	  Support for POCO X3 Pro
 
+config MACH_XIAOMI_RAPHAEL
+	bool "Xiaomi raphael board"
+	select MACH_XIAOMI_SM8150
+	help
+	  Support for Redmi K20 Pro/Mi 9T Pro
+
 endmenu
