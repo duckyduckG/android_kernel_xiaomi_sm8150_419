@@ -58,6 +58,9 @@ enum {
 	HW_PLATFORM_HDK = 31,
 	HW_PLATFORM_IDP = 34,
 #if defined(CONFIG_MACH_XIAOMI_SM8150)
+	HW_PLATFORM_F1  = 37,
+	HW_PLATFORM_E5G = 39,
+	HW_PLATFORM_F11 = 40,
 	HW_PLATFORM_J20S = 47,
 #endif
 	HW_PLATFORM_INVALID
@@ -83,6 +86,9 @@ const char *hw_platform[] = {
 	[HW_PLATFORM_HDK] = "HDK",
 #if defined(CONFIG_MACH_XIAOMI_SM8150)
 	[HW_PLATFORM_J20S] = "VAYU",
+	[HW_PLATFORM_F1]  = "CEPHEUS",
+	[HW_PLATFORM_E5G] = "ANDROMEDA",
+	[HW_PLATFORM_F11] = "RAPHAEL",
 #endif
 	[HW_PLATFORM_IDP] = "IDP"
 };
@@ -2085,6 +2091,12 @@ uint32_t get_hw_version_platform(void)
 	uint32_t hw_type = socinfo_get_platform_type();
 	if (hw_type == HW_PLATFORM_J20S)
 		return HARDWARE_PLATFORM_VAYU;
+	else if (hw_type == HW_PLATFORM_F1)
+		return HARDWARE_PLATFORM_CEPHEUS;
+	else if (hw_type == HW_PLATFORM_E5G)
+		return HARDWARE_PLATFORM_ANDROMEDA;
+	else if (hw_type == HW_PLATFORM_F11)
+		return HARDWARE_PLATFORM_RAPHAEL;
 	else
 		return HARDWARE_PLATFORM_UNKNOWN;
 }
