@@ -519,6 +519,10 @@ static const char *__cam_isp_resource_handle_id_to_type(
 		return "STATS_RS";
 	case CAM_ISP_IFE_OUT_RES_STATS_CS:
 		return "STATS_CS";
+#if defined(CONFIG_MACH_XIAOMI_VAYU)
+	case CAM_ISP_IFE_OUT_RES_LCR:
+		return "LCR";
+#endif
 	default:
 		return "CAM_ISP_Invalid_Resource_Type";
 	}
