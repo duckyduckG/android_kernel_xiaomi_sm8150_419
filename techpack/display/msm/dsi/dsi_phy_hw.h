@@ -115,6 +115,9 @@ struct dsi_phy_cfg {
 	enum dsi_phy_type phy_type;
 	unsigned long bit_clk_rate_hz;
 	u32 data_lanes;
+#if defined(CONFIG_MACH_XIAOMI_SM8150)
+	bool cphy_strength;
+#endif
 };
 
 struct dsi_phy_hw;
