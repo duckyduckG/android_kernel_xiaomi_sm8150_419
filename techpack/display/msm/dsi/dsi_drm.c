@@ -7,6 +7,10 @@
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_atomic.h>
 
+#if defined(CONFIG_MACH_XIAOMI)
+#include <drm/drm_notifier.h>
+#endif
+
 #include "msm_kms.h"
 #include "sde_connector.h"
 #include "dsi_drm.h"
@@ -20,6 +24,48 @@
 #define DEFAULT_PANEL_JITTER_DENOMINATOR	1
 #define DEFAULT_PANEL_JITTER_ARRAY_SIZE		2
 #define DEFAULT_PANEL_PREFILL_LINES	25
+
+#if defined(CONFIG_MACH_XIAOMI)
+static BLOCKING_NOTIFIER_HEAD(drm_notifier_list);
+/**
+ * drm_register_client - register a client notifier
+ * @nb: notifier block to callback on events
+ *
+ * This function registers a notifier callback function
+ * to msm_drm_notifier_list, which would be called when
+ * received unblank/power down event.
+ */
+int drm_register_client(struct notifier_block *nb)
+{
+	return blocking_notifier_chain_register(&drm_notifier_list, nb);
+}
+EXPORT_SYMBOL(drm_register_client);
+
+/**
+ * drm_unregister_client - unregister a client notifier
+ * @nb: notifier block to callback on events
+ *
+ * This function unregisters the callback function from
+ * msm_drm_notifier_list.
+ */
+int drm_unregister_client(struct notifier_block *nb)
+{
+	return blocking_notifier_chain_unregister(&drm_notifier_list, nb);
+}
+EXPORT_SYMBOL(drm_unregister_client);
+
+/**
+ * drm_notifier_call_chain - notify clients of drm_events
+ * @val: event MSM_DRM_EARLY_EVENT_BLANK or MSM_DRM_EVENT_BLANK
+ * @v: notifier data, inculde display id and display blank
+ *     event(unblank or power down).
+ */
+int drm_notifier_call_chain(unsigned long val, void *v)
+{
+	return blocking_notifier_call_chain(&drm_notifier_list, val, v);
+}
+EXPORT_SYMBOL(drm_notifier_call_chain);
+#endif
 
 static struct dsi_display_mode_priv_info default_priv_info = {
 	.panel_jitter_numer = DEFAULT_PANEL_JITTER_NUMERATOR,
@@ -165,6 +211,10 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 {
 	int rc = 0;
 	struct dsi_bridge *c_bridge = to_dsi_bridge(bridge);
+#if defined(CONFIG_MACH_XIAOMI)
+	struct drm_notify_data notify_data;
+	int power_mode = 0;
+#endif
 
 	if (!bridge) {
 		DSI_ERR("Invalid params\n");
@@ -178,6 +228,13 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 
 	if (bridge->encoder->crtc->state->active_changed)
 		atomic_set(&c_bridge->display->panel->esd_recovery_pending, 0);
+
+#if defined(CONFIG_MACH_XIAOMI)
+	power_mode = sde_connector_get_lp(c_bridge->display->drm_conn);
+	notify_data.data = &power_mode;
+	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
+	drm_notifier_call_chain(DRM_EARLY_EVENT_BLANK, &notify_data);
+#endif
 
 	/* By this point mode should have been validated through mode_fixup */
 	rc = dsi_display_set_mode(c_bridge->display,
@@ -212,6 +269,9 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 				c_bridge->id, rc);
 		(void)dsi_display_unprepare(c_bridge->display);
 	}
+#if defined(CONFIG_MACH_XIAOMI)
+	drm_notifier_call_chain(DRM_EVENT_BLANK, &notify_data);
+#endif
 	SDE_ATRACE_END("dsi_display_enable");
 
 	rc = dsi_display_splash_res_cleanup(c_bridge->display);
@@ -258,11 +318,23 @@ static void dsi_bridge_disable(struct drm_bridge *bridge)
 	int private_flags;
 	struct dsi_display *display;
 	struct dsi_bridge *c_bridge = to_dsi_bridge(bridge);
+#if defined(CONFIG_MACH_XIAOMI)
+	struct drm_notify_data notify_data;
+	int power_mode = 0;
+#endif
 
 	if (!bridge) {
 		DSI_ERR("Invalid params\n");
 		return;
 	}
+
+#if defined(CONFIG_MACH_XIAOMI)
+	power_mode = sde_connector_get_lp(c_bridge->display->drm_conn);
+	notify_data.data = &power_mode;
+	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
+	drm_notifier_call_chain(DRM_R_EARLY_EVENT_BLANK, &notify_data);
+#endif
+
 	display = c_bridge->display;
 	private_flags =
 		bridge->encoder->crtc->state->adjusted_mode.private_flags;
@@ -285,11 +357,22 @@ static void dsi_bridge_post_disable(struct drm_bridge *bridge)
 {
 	int rc = 0;
 	struct dsi_bridge *c_bridge = to_dsi_bridge(bridge);
+#if defined(CONFIG_MACH_XIAOMI)
+	struct drm_notify_data notify_data;
+	int power_mode = 0;
+#endif
 
 	if (!bridge) {
 		DSI_ERR("Invalid params\n");
 		return;
 	}
+
+#if defined(CONFIG_MACH_XIAOMI)
+	power_mode = sde_connector_get_lp(c_bridge->display->drm_conn);
+	notify_data.data = &power_mode;
+	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
+	drm_notifier_call_chain(DRM_EARLY_EVENT_BLANK, &notify_data);
+#endif
 
 	SDE_ATRACE_BEGIN("dsi_bridge_post_disable");
 	SDE_ATRACE_BEGIN("dsi_display_disable");
@@ -309,6 +392,9 @@ static void dsi_bridge_post_disable(struct drm_bridge *bridge)
 		SDE_ATRACE_END("dsi_bridge_post_disable");
 		return;
 	}
+#if defined(CONFIG_MACH_XIAOMI)
+	drm_notifier_call_chain(DRM_EVENT_BLANK, &notify_data);
+#endif
 	SDE_ATRACE_END("dsi_bridge_post_disable");
 }
 
