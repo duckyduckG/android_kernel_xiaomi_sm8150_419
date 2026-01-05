@@ -474,8 +474,8 @@ static int onewire_gpio_probe(struct platform_device *pdev)
 	       (uint32_t)(onewire_data->onewire_gpio_level_addr),
 	       (uint32_t)(onewire_data->onewire_gpio_cfg_addr));
 	ow_log("onewire_data->gpio_cfg66_reg is %x; onewire_data->gpio_in_out_reg is %x",
-	       (uint32_t)(onewire_data->gpio_cfg66_reg),
-	       (uint32_t)(onewire_data->gpio_in_out_reg));
+	       (uintptr_t)(onewire_data->gpio_cfg66_reg),
+	       (uintptr_t)(onewire_data->gpio_in_out_reg));
 
 	// create device node
 	onewire_data->dev =
