@@ -6779,7 +6779,7 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 		.stream_name = "Quaternary MI2S Playback",
 		.cpu_dai_name = "msm-dai-q6-mi2s.3",
 		.platform_name = "msm-pcm-routing",
-#ifdef CONFIG_SND_SOC_TAS256X
+#if defined(CONFIG_SND_SOC_TAS256X) && defined(CONFIG_MACH_XIAOMI_VAYU)
 		.codec_name     = "tas256x.1-004c",
 		.codec_dai_name = "tas256x ASI1",
 #else
@@ -6802,7 +6802,7 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 		.stream_name = "Quaternary MI2S Capture",
 		.cpu_dai_name = "msm-dai-q6-mi2s.3",
 		.platform_name = "msm-pcm-routing",
-#ifdef CONFIG_SND_SOC_TAS256X
+#if defined(CONFIG_SND_SOC_TAS256X) && defined(CONFIG_MACH_XIAOMI_VAYU)
 		.codec_name     = "tas256x.1-004c",
 		.codec_dai_name = "tas256x ASI1",
 #else
