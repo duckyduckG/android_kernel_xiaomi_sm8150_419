@@ -23,7 +23,6 @@
 };
 
 &mdss_mdp {
-	qcom,fullsize-va-map;
 	qcom,sde-min-core-ib-kbps = <0>;
 	qcom,sde-min-llcc-ib-kbps = <0>;
 };
@@ -34,14 +33,12 @@
 		iommus = <&apps_smmu 0x2040 0x0>;
 		qcom,iommu-dma-addr-pool = <0x00020000 0xfffe0000>;
 		qcom,iommu-faults = "non-fatal";
-		qcom,fullsize-va-map;
 	};
 	smmu_rot_sec: qcom,smmu_rot_sec_cb {
 		compatible = "qcom,smmu_sde_rot_sec";
 		iommus = <&apps_smmu 0x2041 0x0>;
 		qcom,iommu-dma-addr-pool = <0x00020000 0xfffe0000>;
 		qcom,iommu-faults = "non-fatal";
-		qcom,fullsize-va-map;
 	};
 };
 
