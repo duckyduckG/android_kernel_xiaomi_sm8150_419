@@ -21,7 +21,7 @@
 #endif
 
 #if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
-#include "../../../../../kernel/irq/internals.h"
+#include "../../../../kernel/irq/internals.h"
 #endif
 
 /**
