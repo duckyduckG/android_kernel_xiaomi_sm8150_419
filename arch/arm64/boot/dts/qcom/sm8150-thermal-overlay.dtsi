@@ -75,45 +75,31 @@
 			};
 			trip1_cpu1 {
 				trip = <&pm8150_trip1>;
-				cooling-device =
-					<&CPU1 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu1_isolate 1 1>;
 			};
 			trip1_cpu2 {
 				trip = <&pm8150_trip1>;
-				cooling-device =
-					<&CPU2 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu2_isolate 1 1>;
 			};
 			trip1_cpu3 {
 				trip = <&pm8150_trip1>;
-				cooling-device =
-					<&CPU3 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu3_isolate 1 1>;
 			};
 			trip1_cpu4 {
 				trip = <&pm8150_trip1>;
-				cooling-device =
-					<&CPU4 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu4_isolate 1 1>;
 			};
 			trip1_cpu5 {
 				trip = <&pm8150_trip1>;
-				cooling-device =
-					<&CPU5 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu5_isolate 1 1>;
 			};
 			trip1_cpu6 {
 				trip = <&pm8150_trip1>;
-				cooling-device =
-					<&CPU6 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu6_isolate 1 1>;
 			};
 			trip1_cpu7 {
 				trip = <&pm8150_trip1>;
-				cooling-device =
-					<&CPU7 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu7_isolate 1 1>;
 			};
 		};
 	};
@@ -122,27 +108,19 @@
 		cooling-maps {
 			soc_cpu4 {
 				trip = <&soc_trip>;
-				cooling-device =
-					<&CPU4 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu4_isolate 1 1>;
 			};
 			soc_cpu5 {
 				trip = <&soc_trip>;
-				cooling-device =
-					<&CPU5 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu5_isolate 1 1>;
 			};
 			soc_cpu6 {
 				trip = <&soc_trip>;
-				cooling-device =
-					<&CPU6 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu6_isolate 1 1>;
 			};
 			soc_cpu7 {
 				trip = <&soc_trip>;
-				cooling-device =
-					<&CPU7 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu7_isolate 1 1>;
 			};
 		};
 	};
@@ -151,15 +129,11 @@
 		cooling-maps {
 			vbat_cpu4 {
 				trip = <&b_bcl_lvl0>;
-				cooling-device =
-					<&CPU4 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu4_isolate 1 1>;
 			};
 			vbat_cpu5 {
 				trip = <&b_bcl_lvl0>;
-				cooling-device =
-					<&CPU5 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu5_isolate 1 1>;
 			};
 			vbat_gpu0 {
 				trip = <&b_bcl_lvl0>;
@@ -172,15 +146,11 @@
 		cooling-maps {
 			vbat_cpu6 {
 				trip = <&b_bcl_lvl1>;
-				cooling-device =
-					<&CPU6 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu6_isolate 1 1>;
 			};
 			vbat_cpu7 {
 				trip = <&b_bcl_lvl1>;
-				cooling-device =
-					<&CPU7 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu7_isolate 1 1>;
 			};
 			vbat_gpu1 {
 				trip = <&b_bcl_lvl1>;
@@ -204,15 +174,11 @@
 		cooling-maps {
 			vph_cpu4 {
 				trip = <&l_bcl_lvl0>;
-				cooling-device =
-					<&CPU4 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu4_isolate 1 1>;
 			};
 			vph_cpu5 {
 				trip = <&l_bcl_lvl0>;
-				cooling-device =
-					<&CPU5 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu5_isolate 1 1>;
 			};
 			vph_gpu0 {
 				trip = <&l_bcl_lvl0>;
@@ -226,15 +192,11 @@
 		cooling-maps {
 			vph_cpu6 {
 				trip = <&l_bcl_lvl1>;
-				cooling-device =
-					<&CPU6 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu6_isolate 1 1>;
 			};
 			vph_cpu7 {
 				trip = <&l_bcl_lvl1>;
-				cooling-device =
-					<&CPU7 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu7_isolate 1 1>;
 			};
 			vph_gpu1 {
 				trip = <&l_bcl_lvl1>;
