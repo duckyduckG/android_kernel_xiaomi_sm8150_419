@@ -33,6 +33,49 @@
 		isens_vref_1p8-supply = <&pm8150_l12_ao>;
 		isens-vref-1p8-settings = <1800000 1800000 20000>;
 	};
+
+	qcom,cpu-isolation {
+		compatible = "qcom,cpu-isolate";
+		cpu0_isolate: cpu0-isolate {
+			qcom,cpu = <&CPU0>;
+			#cooling-cells = <2>;
+		};
+
+		cpu1_isolate: cpu1-isolate {
+			qcom,cpu = <&CPU1>;
+			#cooling-cells = <2>;
+		};
+
+		cpu2_isolate: cpu2-isolate {
+			qcom,cpu = <&CPU2>;
+			#cooling-cells = <2>;
+		};
+
+		cpu3_isolate: cpu3-isolate {
+			qcom,cpu = <&CPU3>;
+			#cooling-cells = <2>;
+		};
+
+		cpu4_isolate: cpu4-isolate {
+			qcom,cpu = <&CPU4>;
+			#cooling-cells = <2>;
+		};
+
+		cpu5_isolate: cpu5-isolate {
+			qcom,cpu = <&CPU5>;
+			#cooling-cells = <2>;
+		};
+
+		cpu6_isolate: cpu6-isolate {
+			qcom,cpu = <&CPU6>;
+			#cooling-cells = <2>;
+		};
+
+		cpu7_isolate: cpu7-isolate {
+			qcom,cpu = <&CPU7>;
+			#cooling-cells = <2>;
+		};
+	};
 };
 
 &soc {
@@ -931,9 +974,7 @@
 		cooling-maps {
 			cpu00_cdev {
 				trip = <&cpu00_config>;
-				cooling-device =
-					<&CPU0 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu0_isolate 1 1>;
 			};
 		};
 	};
@@ -954,9 +995,7 @@
 		cooling-maps {
 			cpu01_cdev {
 				trip = <&cpu01_config>;
-				cooling-device =
-					<&CPU1 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu1_isolate 1 1>;
 			};
 		};
 	};
@@ -977,9 +1016,7 @@
 		cooling-maps {
 			cpu02_cdev {
 				trip = <&cpu02_config>;
-				cooling-device =
-					<&CPU2 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu2_isolate 1 1>;
 			};
 		};
 	};
@@ -1000,9 +1037,7 @@
 		cooling-maps {
 			cpu03_cdev {
 				trip = <&cpu03_config>;
-				cooling-device =
-					<&CPU3 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu3_isolate 1 1>;
 			};
 		};
 	};
@@ -1023,9 +1058,7 @@
 		cooling-maps {
 			cpu10_cdev {
 				trip = <&cpu10_config>;
-				cooling-device =
-					<&CPU4 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu4_isolate 1 1>;
 			};
 		};
 	};
@@ -1046,9 +1079,7 @@
 		cooling-maps {
 			cpu11_cdev {
 				trip = <&cpu11_config>;
-				cooling-device =
-					<&CPU5 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu5_isolate 1 1>;
 			};
 		};
 	};
@@ -1069,9 +1100,7 @@
 		cooling-maps {
 			cpu12_cdev {
 				trip = <&cpu12_config>;
-				cooling-device =
-					<&CPU6 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu6_isolate 1 1>;
 			};
 		};
 	};
@@ -1092,9 +1121,7 @@
 		cooling-maps {
 			cpu13_cdev {
 				trip = <&cpu13_config>;
-				cooling-device =
-					<&CPU7 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu7_isolate 1 1>;
 			};
 		};
 	};
@@ -1115,9 +1142,7 @@
 		cooling-maps {
 			cpu14_cdev {
 				trip = <&cpu14_config>;
-				cooling-device =
-					<&CPU4 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu4_isolate 1 1>;
 			};
 		};
 	};
@@ -1138,9 +1163,7 @@
 		cooling-maps {
 			cpu15_cdev {
 				trip = <&cpu15_config>;
-				cooling-device =
-					<&CPU5 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu5_isolate 1 1>;
 			};
 		};
 	};
@@ -1161,9 +1184,7 @@
 		cooling-maps {
 			cpu16_cdev {
 				trip = <&cpu16_config>;
-				cooling-device =
-					<&CPU6 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu6_isolate 1 1>;
 			};
 		};
 	};
@@ -1184,9 +1205,7 @@
 		cooling-maps {
 			cpu17_cdev {
 				trip = <&cpu17_config>;
-				cooling-device =
-					<&CPU7 THERMAL_MAX_LIMIT
-						THERMAL_MAX_LIMIT>;
+				cooling-device = <&cpu7_isolate 1 1>;
 			};
 		};
 	};
