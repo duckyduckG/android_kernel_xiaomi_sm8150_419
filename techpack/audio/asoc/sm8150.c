@@ -20,7 +20,7 @@
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
 #include <sound/info.h>
-#include <dsp/audio_notifier.h>
+#include <soc/snd_event.h>
 #include <dsp/q6afe-v2.h>
 #include <dsp/q6core.h>
 #include "device_event.h"
@@ -59,7 +59,6 @@
 #define WCN_CDC_SLIM_RX_CH_MAX 2
 #define WCN_CDC_SLIM_TX_CH_MAX 3
 
-#define ADSP_STATE_READY_TIMEOUT_MS 3000
 #define MSM_LL_QOS_VALUE 300 /* time in us to ensure LPM doesn't go in C3/C4 */
 #define MSM_HIFI_ON 1
 
@@ -167,7 +166,7 @@ struct msm_asoc_mach_data {
 	struct device_node *fsa_handle;
 	struct device_node *mi2s_gpio_p[MI2S_MAX]; /* used by pinctrl API */
 	struct snd_soc_component *component;
-	struct work_struct adsp_power_up_work;
+	bool is_afe_config_done;
 };
 
 struct msm_asoc_wcd93xx_codec {
@@ -601,10 +600,7 @@ static SOC_ENUM_SINGLE_EXT_DECL(aux_pcm_rx_format, bit_format_text);
 static SOC_ENUM_SINGLE_EXT_DECL(aux_pcm_tx_format, bit_format_text);
 static SOC_ENUM_SINGLE_EXT_DECL(hifi_function, hifi_text);
 
-static struct platform_device *spdev;
-
 static int msm_hifi_control;
-static bool is_initial_boot;
 static bool codec_reg_done;
 static struct snd_soc_aux_dev *msm_aux_dev;
 static struct snd_soc_codec_conf *msm_codec_conf;
@@ -3970,136 +3966,6 @@ static void msm_afe_clear_config(void)
 	afe_clear_config(AFE_SLIMBUS_SLAVE_CONFIG);
 }
 
-static int msm_adsp_power_up_config(struct snd_soc_component *component,
-				    struct snd_card *card)
-{
-	int ret = 0;
-	unsigned long timeout;
-	int adsp_ready = 0;
-	bool snd_card_online = 0;
-
-	timeout = jiffies +
-		msecs_to_jiffies(ADSP_STATE_READY_TIMEOUT_MS);
-	
-	/* sleep for 100ms before querying AVS up */
-	msleep(100);
-	do {
-		if (!snd_card_online) {
-			snd_card_online = snd_card_is_online_state(card);
-			pr_debug("%s: Sound card is %s\n", __func__,
-				 snd_card_online ? "Online" : "Offline");
-		}
-		if (!adsp_ready) {
-			adsp_ready = q6core_is_adsp_ready();
-			pr_debug("%s: ADSP Audio is %s\n", __func__,
-				 adsp_ready ? "ready" : "not ready");
-		}
-		if (snd_card_online && adsp_ready)
-			break;
-
-		/*
-		 * Sound card/ADSP will be coming up after subsystem restart and
-		 * it might not be fully up when the control reaches
-		 * here. So, wait for 50msec before checking ADSP state
-		 */
-		msleep(50);
-	} while (time_after(timeout, jiffies));
-
-	if (!snd_card_online || !adsp_ready) {
-		pr_err("%s: Timeout. Sound card is %s, ADSP Audio is %s\n",
-		       __func__,
-		       snd_card_online ? "Online" : "Offline",
-		       adsp_ready ? "ready" : "not ready");
-		ret = -ETIMEDOUT;
-		goto err;
-	}
-
-	ret = msm_afe_set_config(component);
-	if (ret)
-		pr_err("%s: Failed to set AFE config. err %d\n",
-			__func__, ret);
-
-	return 0;
-
-err:
-	return ret;
-}
-
-static void msm_adsp_power_up_config_work(struct work_struct *work)
-{
-	struct msm_asoc_mach_data *pdata;
-	struct snd_soc_component *component;
-	struct snd_card *card;
-
-	pdata = container_of(work, struct msm_asoc_mach_data,
-			     adsp_power_up_work);
-	component = pdata->component;
-	card = component->card->snd_card;
-	msm_adsp_power_up_config(component, card);
-}
-
-static int sm8150_notifier_service_cb(struct notifier_block *this,
-					 unsigned long opcode, void *ptr)
-{
-	int ret;
-	struct snd_soc_card *card = NULL;
-	const char *be_dl_name = LPASS_BE_SLIMBUS_0_RX;
-	struct snd_soc_pcm_runtime *rtd;
-	struct snd_soc_dai *codec_dai;
-	struct snd_soc_component *component;
-	struct msm_asoc_mach_data *pdata;
-
-	pr_debug("%s: Service opcode 0x%lx\n", __func__, opcode);
-
-	switch (opcode) {
-	case AUDIO_NOTIFIER_SERVICE_DOWN:
-		/*
-		 * Use flag to ignore initial boot notifications
-		 * On initial boot msm_adsp_power_up_config is
-		 * called on init. There is no need to clear
-		 * and set the config again on initial boot.
-		 */
-		if (is_initial_boot)
-			break;
-		msm_afe_clear_config();
-		break;
-	case AUDIO_NOTIFIER_SERVICE_UP:
-		if (is_initial_boot) {
-			is_initial_boot = false;
-			break;
-		}
-		if (!spdev)
-			return -EINVAL;
-
-		card = platform_get_drvdata(spdev);
-		rtd = snd_soc_get_pcm_runtime(card, be_dl_name);
-		if (!rtd) {
-			dev_err(card->dev,
-				"%s: snd_soc_get_pcm_runtime for %s failed!\n",
-				__func__, be_dl_name);
-			ret = -EINVAL;
-			goto err;
-		}
-		codec_dai = rtd->codec_dai;
-		if (!strcmp(dev_name(codec_dai->dev), "tavil_codec"))
-			component = snd_soc_rtdcom_lookup(rtd, "tavil_codec");
-
-		pdata = snd_soc_card_get_drvdata(card);
-		pdata->component = component;
-		schedule_work(&pdata->adsp_power_up_work);
-		break;
-	default:
-		break;
-	}
-err:
-	return NOTIFY_OK;
-}
-
-static struct notifier_block service_nb = {
-	.notifier_call  = sm8150_notifier_service_cb,
-	.priority = -INT_MAX,
-};
-
 static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 {
 	int ret = 0;
@@ -4190,11 +4056,12 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 	if (!strcmp(dev_name(codec_dai->dev), "tavil_codec"))
 		msm_codec_fn.get_afe_config_fn = tavil_get_afe_config;
 
-	ret = msm_adsp_power_up_config(component, rtd->card->snd_card);
+	ret = msm_afe_set_config(component);
 	if (ret) {
 		pr_err("%s: Failed to set AFE config %d\n", __func__, ret);
 		goto err;
 	}
+	pdata->is_afe_config_done = true;
 
 	config_data = msm_codec_fn.get_afe_config_fn(component,
 						     AFE_AANC_VERSION);
@@ -7365,6 +7232,116 @@ static void msm_i2s_auxpcm_deinit(void)
 		mi2s_intf_conf[count].msm_is_mi2s_master = 0;
 	}
 }
+
+
+static int sm8150_ssr_enable(struct device *dev, void *data)
+{
+	struct platform_device *pdev = to_platform_device(dev);
+	struct snd_soc_card *card = platform_get_drvdata(pdev);
+	struct msm_asoc_mach_data *pdata = NULL;
+	struct snd_soc_component *component = NULL;
+	int ret = 0;
+
+	if (!card) {
+		dev_err(dev, "%s: card is NULL\n", __func__);
+		ret = -EINVAL;
+		goto err;
+	}
+
+	if (!strcmp(card->name, "sm8150-tavil-snd-card")) {
+		pdata = snd_soc_card_get_drvdata(card);
+		if (!pdata->is_afe_config_done) {
+			const char *be_dl_name = LPASS_BE_SLIMBUS_0_RX;
+			struct snd_soc_pcm_runtime *rtd;
+
+			rtd = snd_soc_get_pcm_runtime(card, be_dl_name);
+			if (!rtd) {
+				dev_err(dev,
+					"%s: snd_soc_get_pcm_runtime for %s failed!\n",
+					__func__, be_dl_name);
+				ret = -EINVAL;
+				goto err;
+			}
+			component = snd_soc_rtdcom_lookup(rtd, "tavil_codec");
+			if (!component) {
+				dev_err(dev, "%s: component is NULL\n",
+					__func__);
+				ret = -EINVAL;
+				goto err;
+			}
+			ret = msm_afe_set_config(component);
+			if (ret)
+				dev_err(dev, "%s: Failed to set AFE config. err %d\n",
+					__func__, ret);
+			else
+				pdata->is_afe_config_done = true;
+		}
+	}
+	snd_soc_card_change_online_state(card, 1);
+	dev_dbg(dev, "%s: setting snd_card to ONLINE\n", __func__);
+
+err:
+	return ret;
+}
+static void sm8150_ssr_disable(struct device *dev, void *data)
+{
+	struct platform_device *pdev = to_platform_device(dev);
+	struct snd_soc_card *card = platform_get_drvdata(pdev);
+	struct msm_asoc_mach_data *pdata;
+
+	if (!card) {
+		dev_err(dev, "%s: card is NULL\n", __func__);
+		return;
+	}
+
+	dev_dbg(dev, "%s: setting snd_card to OFFLINE\n", __func__);
+	snd_soc_card_change_online_state(card, 0);
+
+	if (!strcmp(card->name, "sm8150-tavil-snd-card")) {
+		pdata = snd_soc_card_get_drvdata(card);
+		msm_afe_clear_config();
+		pdata->is_afe_config_done = false;
+	}
+}
+
+static const struct snd_event_ops sm8150_ssr_ops = {
+	.enable = sm8150_ssr_enable,
+	.disable = sm8150_ssr_disable,
+};
+
+static int msm_audio_ssr_compare(struct device *dev, void *data)
+{
+	struct device_node *node = data;
+
+	dev_dbg(dev, "%s: dev->of_node = 0x%p, node = 0x%p\n",
+		__func__, dev->of_node, node);
+	return (dev->of_node && dev->of_node == node);
+}
+
+static int msm_audio_ssr_register(struct device *dev)
+{
+	struct device_node *np = dev->of_node;
+	struct snd_event_clients *ssr_clients = NULL;
+	struct device_node *node;
+	int ret;
+	int i;
+
+	for (i = 0; ; i++) {
+		node = of_parse_phandle(np, "qcom,msm_audio_ssr_devs", i);
+		if (!node)
+			break;
+		snd_event_mstr_add_client(&ssr_clients,
+					msm_audio_ssr_compare, node);
+	}
+
+	ret = snd_event_master_register(dev, &sm8150_ssr_ops,
+					ssr_clients, NULL);
+	if (!ret)
+		snd_event_notify(dev, SND_EVENT_UP);
+
+	return ret;
+}
+
 static int msm_asoc_machine_probe(struct platform_device *pdev)
 {
 	struct snd_soc_card *card;
@@ -7426,9 +7403,6 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 		goto err;
 	}
 	dev_info(&pdev->dev, "Sound card %s registered\n", card->name);
-	spdev = pdev;
-
-	INIT_WORK(&pdata->adsp_power_up_work, msm_adsp_power_up_config_work);
 
 	ret = of_platform_populate(pdev->dev.of_node, NULL, NULL, &pdev->dev);
 	if (ret) {
@@ -7513,11 +7487,11 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 	}
 
 	msm_i2s_auxpcm_init(pdev);
-	is_initial_boot = true;
-	ret = audio_notifier_register("sm8150", AUDIO_NOTIFIER_ADSP_DOMAIN,
-				      &service_nb);
-	if (ret < 0)
-		pr_err("%s: Audio notifier register failed ret = %d\n",
+
+	ret = msm_audio_ssr_register(&pdev->dev);
+	if (ret)
+		dev_err(&pdev->dev,
+			"%s: Registration with SND event FWK failed ret = %d\n",
 			__func__, ret);
 
 	return 0;
@@ -7529,7 +7503,7 @@ err:
 
 static int msm_asoc_machine_remove(struct platform_device *pdev)
 {
-	audio_notifier_deregister("sm8150");
+	snd_event_master_deregister(&pdev->dev);
 	msm_i2s_auxpcm_deinit();
 
 	msm_release_pinctrl(pdev);
