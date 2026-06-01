@@ -9,6 +9,7 @@
 #include <linux/of.h>
 #include <linux/slab.h>
 #include <linux/sort.h>
+#include <linux/of_reserved_mem.h>
 #include "msm_vidc_debug.h"
 #include "msm_vidc_resources.h"
 #include "msm_vidc_res_parse.h"
@@ -376,6 +377,21 @@ static int msm_vidc_load_allowed_clocks_table(
 static int msm_vidc_populate_mem_cdsp(struct device *dev,
 		struct msm_vidc_platform_resources *res)
 {
+	struct device_node *mem_node;
+	int ret;
+
+	mem_node = of_parse_phandle(dev->of_node, "memory-region", 0);
+	if (mem_node) {
+		ret = of_reserved_mem_device_init_by_idx(dev,
+				dev->of_node, 0);
+		of_node_put(dev->of_node);
+		if (ret) {
+			d_vpr_e("Failed to initialize reserved mem, ret %d\n",
+				ret);
+			return ret;
+		}
+	}
+
 	res->mem_cdsp.dev = dev;
 
 	return 0;

@@ -1043,6 +1043,11 @@ static struct msm_vidc_format_desc venc_input_formats[] = {
 		.fourcc = V4L2_PIX_FMT_SDE_Y_CBCR_H2V2_P010_VENUS,
 	},
 	{
+		.name = "YCbCr Semiplanar 4:2:0 128 aligned",
+		.description = "Y/CbCr 4:2:0 128 aligned",
+		.fourcc = V4L2_PIX_FMT_NV12_128,
+	},
+	{
 		.name = "YCbCr Semiplanar 4:2:0 512 aligned",
 		.description = "Y/CbCr 4:2:0 512 aligned",
 		.fourcc = V4L2_PIX_FMT_NV12_512,
@@ -1077,6 +1082,14 @@ struct msm_vidc_format_constraint enc_pix_format_constraints[] = {
 		.uv_buffer_alignment = 256,
 	},
 	{
+		.fourcc = V4L2_PIX_FMT_NV12_128,
+		.num_planes = 2,
+		.y_max_stride = 8192,
+		.y_buffer_alignment = 128,
+		.uv_max_stride = 8192,
+		.uv_buffer_alignment = 32,
+	},
+	{
 		.fourcc = V4L2_PIX_FMT_NV12_512,
 		.num_planes = 2,
 		.y_max_stride = 16384,
@@ -1087,18 +1100,18 @@ struct msm_vidc_format_constraint enc_pix_format_constraints[] = {
 	{
 		.fourcc = V4L2_PIX_FMT_NV12,
 		.num_planes = 2,
-		.y_max_stride = 16384,
-		.y_buffer_alignment = 512,
-		.uv_max_stride = 16384,
-		.uv_buffer_alignment = 256,
+		.y_max_stride = 8192,
+		.y_buffer_alignment = 128,
+		.uv_max_stride = 8192,
+		.uv_buffer_alignment = 32,
 	},
 	{
 		.fourcc = V4L2_PIX_FMT_NV21,
 		.num_planes = 2,
 		.y_max_stride = 8192,
-		.y_buffer_alignment = 512,
+		.y_buffer_alignment = 128,
 		.uv_max_stride = 8192,
-		.uv_buffer_alignment = 256,
+		.uv_buffer_alignment = 32,
 	},
 };
 
@@ -3297,8 +3310,6 @@ int msm_venc_set_intra_refresh_mode(struct msm_vidc_inst *inst)
 	ctrl = get_ctrl(inst, V4L2_CID_MPEG_VIDC_ENABLE_ONLY_BASE_LAYER_IR);
 	enable.enable = !!ctrl->val;
 
-	intra_refresh.mode = HFI_INTRA_REFRESH_RANDOM;
-
 	ctrl = get_ctrl(inst, V4L2_CID_MPEG_VIDC_VIDEO_INTRA_REFRESH_RANDOM);
 	intra_refresh.mbs = 0;
 	f = &inst->fmts[OUTPUT_PORT].v4l2_fmt;
@@ -3306,6 +3317,8 @@ int msm_venc_set_intra_refresh_mode(struct msm_vidc_inst *inst)
 		u32 num_mbs_per_frame = 0;
 		u32 width = f->fmt.pix_mp.width;
 		u32 height = f->fmt.pix_mp.height;
+
+		intra_refresh.mode = HFI_INTRA_REFRESH_RANDOM;
 
 		num_mbs_per_frame = NUM_MBS_PER_FRAME(height, width);
 		intra_refresh.mbs = num_mbs_per_frame / ctrl->val;

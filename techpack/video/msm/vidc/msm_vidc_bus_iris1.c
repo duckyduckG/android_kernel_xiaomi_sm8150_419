@@ -402,7 +402,7 @@ static unsigned long __calculate_encoder(struct vidc_bus_vote_data *d)
 
 	b_frames_enabled = d->b_frames_enabled;
 	original_color_format = d->num_formats >= 1 ?
-		d->color_formats[0] : HAL_UNUSED_COLOR;
+		d->color_formats[0] : HFI_COLOR_FORMAT_NV12_UBWC;
 
 	dpb_bpp = d->num_formats >= 1 ?
 		__bpp(d->color_formats[0], d->sid) : INT_MAX;
