@@ -32,7 +32,6 @@ static void msm_vidc_print_running_insts(struct msm_vidc_core *core);
 
 #define V4L2_H264_LEVEL_UNKNOWN V4L2_MPEG_VIDEO_H264_LEVEL_UNKNOWN
 #define V4L2_HEVC_LEVEL_UNKNOWN V4L2_MPEG_VIDEO_HEVC_LEVEL_UNKNOWN
-#define V4L2_MPEG_VIDEO_HEVC_LEVEL_UNKNOWN (V4L2_MPEG_VIDEO_HEVC_LEVEL_6_2 + 1)
 #define V4L2_VP9_LEVEL_61 V4L2_MPEG_VIDC_VIDEO_VP9_LEVEL_61
 
 int msm_comm_g_ctrl_for_id(struct msm_vidc_inst *inst, int id)
@@ -161,6 +160,8 @@ int msm_comm_hfi_to_v4l2(int id, int value, u32 sid)
 		return V4L2_MPEG_VIDEO_HEVC_LEVEL_6_1;
 	case HFI_HEVC_LEVEL_62:
 		return V4L2_MPEG_VIDEO_HEVC_LEVEL_6_2;
+	case HFI_LEVEL_UNKNOWN:
+		return V4L2_MPEG_VIDEO_HEVC_LEVEL_UNKNOWN;
 	default:
 		goto unknown_value;
 	}
@@ -290,6 +291,8 @@ static int h264_level_v4l2_to_hfi(int value, u32 sid)
 		return HFI_H264_LEVEL_61;
 	case V4L2_MPEG_VIDEO_H264_LEVEL_6_2:
 		return HFI_H264_LEVEL_62;
+	case V4L2_MPEG_VIDEO_H264_LEVEL_UNKNOWN:
+		return HFI_LEVEL_UNKNOWN;
 	default:
 		goto unknown_value;
 	}
@@ -328,6 +331,8 @@ static int hevc_level_v4l2_to_hfi(int value, u32 sid)
 		return HFI_HEVC_LEVEL_61;
 	case V4L2_MPEG_VIDEO_HEVC_LEVEL_6_2:
 		return HFI_HEVC_LEVEL_62;
+	case V4L2_MPEG_VIDEO_HEVC_LEVEL_UNKNOWN:
+		return HFI_LEVEL_UNKNOWN;
 	default:
 		goto unknown_value;
 	}
@@ -928,6 +933,37 @@ enum hal_video_codec get_hal_codec(int fourcc, u32 sid)
 	}
 
 	return codec;
+}
+
+enum hal_uncompressed_format msm_comm_get_hal_uncompressed(int fourcc)
+{
+	enum hal_uncompressed_format format = HAL_UNUSED_COLOR;
+
+	switch (fourcc) {
+	case V4L2_PIX_FMT_NV12:
+		format = HAL_COLOR_FORMAT_NV12;
+		break;
+	case V4L2_PIX_FMT_NV12_512:
+		format = HAL_COLOR_FORMAT_NV12_512;
+		break;
+	case V4L2_PIX_FMT_NV21:
+		format = HAL_COLOR_FORMAT_NV21;
+		break;
+	case V4L2_PIX_FMT_NV12_UBWC:
+		format = HAL_COLOR_FORMAT_NV12_UBWC;
+		break;
+	case V4L2_PIX_FMT_NV12_TP10_UBWC:
+		format = HAL_COLOR_FORMAT_NV12_TP10_UBWC;
+		break;
+	case V4L2_PIX_FMT_SDE_Y_CBCR_H2V2_P010_VENUS:
+		format = HAL_COLOR_FORMAT_P010;
+		break;
+	default:
+		format = HAL_UNUSED_COLOR;
+		break;
+	}
+
+	return format;
 }
 
 u32 msm_comm_get_hfi_uncompressed(int fourcc, u32 sid)
