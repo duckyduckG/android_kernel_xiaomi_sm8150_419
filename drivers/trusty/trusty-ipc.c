@@ -765,7 +765,7 @@ static int append_kernel_memref(struct tipc_msg_mref_hdr *hdr,
 	if (WARN_ON(!pg_num || !pg_start))
 		return -EINVAL;
 
-	down_read(&current->mm->mmap_sem);
+	down_read(&current->mm->mmap_lock);
 
 	vma = find_extend_vma(current->mm, pg_start);
 
@@ -800,7 +800,7 @@ static int append_kernel_memref(struct tipc_msg_mref_hdr *hdr,
 			mref->pages, pg_num);
 
 err_out:
-	up_read(&current->mm->mmap_sem);
+	up_read(&current->mm->mmap_lock);
 	return ret;
 }
 
@@ -821,7 +821,7 @@ static int append_user_memref(struct tipc_msg_mref_hdr *hdr,
 
 	gup_flags = (shm->flags & TIPC_MEMREF_PERM_RW) ? FOLL_WRITE : 0;
 
-	down_read(&current->mm->mmap_sem);
+	down_read(&current->mm->mmap_lock);
 
 	/* for all 3 regions */
 	for (i = 0; i < 3; i++) {
@@ -857,7 +857,7 @@ err_bad_cnt:
 err_pinned:
 	if (ret < 0)
 		memref_release_pages(mref, false);
-	up_read(&current->mm->mmap_sem);
+	up_read(&current->mm->mmap_lock);
 	kfree(vmas);
 	return ret;
 }
