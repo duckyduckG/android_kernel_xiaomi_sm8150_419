@@ -1,2 +1,3 @@
 source "drivers/input/touchscreen/xiaomi/nt36672c/Kconfig"
 source "drivers/input/touchscreen/xiaomi/goodix_driver_gt9886/Kconfig"
+source "drivers/input/touchscreen/xiaomi/xiaomi_touch/Kconfig"
