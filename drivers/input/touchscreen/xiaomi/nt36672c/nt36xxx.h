@@ -75,6 +75,9 @@
 #define NVT_TOUCH_MP_SETTING_CRITERIA_FROM_CSV 1
 #define MT_PROTOCOL_B 1
 #define WAKEUP_GESTURE 1
+#define FUNCPAGE_PALM 4
+#define PACKET_PALM_ON 3
+#define PACKET_PALM_OFF 4
 
 /* ---Lockdown Info Support.--- */
 #define LOCKDOWN_INFO_SUPPORT 1
@@ -176,6 +179,7 @@ struct nvt_ts_data {
 	int gesture_command_delayed;
 	bool dev_pm_suspend;
 	struct completion dev_pm_suspend_completion;
+	bool palm_sensor_switch;
 	uint8_t debug_flag;
 };
 
@@ -238,6 +242,7 @@ int32_t nvt_write_addr(uint32_t addr, uint8_t data);
 void nvt_set_dbgfw_status(bool enable);
 bool nvt_get_dbgfw_status(void);
 void nvt_match_fw(void);
+int32_t nvt_set_pocket_palm_switch(uint8_t pocket_palm_switch);
 #if NVT_TOUCH_ESD_PROTECT
 extern void nvt_esd_check_enable(uint8_t enable);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
