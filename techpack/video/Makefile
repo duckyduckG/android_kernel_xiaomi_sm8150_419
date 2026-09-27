@@ -9,14 +9,6 @@ ifeq ($(CONFIG_ARCH_KONA), y)
 LINUXINCLUDE    += -include $(srctree)/techpack/video/config/konavidconf.h
 endif
 
-ifeq ($(CONFIG_ARCH_SM8150), y)
-include $(srctree)/techpack/video/config/msmnilevid.conf
-endif
-
-ifeq ($(CONFIG_ARCH_SM8150), y)
-LINUXINCLUDE    += -include $(srctree)/techpack/video/config/msmnilevidconf.h
-endif
-
 # auto-detect subdirs
 ifeq ($(CONFIG_ARCH_LITO), y)
 include $(srctree)/techpack/video/config/litovid.conf
