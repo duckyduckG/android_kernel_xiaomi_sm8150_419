@@ -702,6 +702,8 @@ struct smb_charger {
 	struct power_supply		*ln_psy;
 	struct power_supply		*halo_psy;
 	struct power_supply		*cp_chip_psy;
+#endif
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	struct power_supply		*batt_verify_psy;
 #endif
 	enum power_supply_type		real_charger_type;

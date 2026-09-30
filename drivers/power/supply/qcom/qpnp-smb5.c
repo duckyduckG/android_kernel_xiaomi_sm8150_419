@@ -1203,10 +1203,15 @@ static int smb5_parse_dt_currents(struct smb5 *chip, struct device_node *node)
 #if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
 	chg->batt_profile_fcc_ua = chip->dt.batt_profile_fcc_ua;
 
+#if (defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)) && \
+	(defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU))
 	rc = of_property_read_u32(node,
 			"mi,fcc-batt-unverify-ua", &chip->dt.batt_unverify_fcc_ua);
 	if (rc < 0)
 		chip->dt.batt_unverify_fcc_ua = -EINVAL;
+#else
+		chip->dt.batt_unverify_fcc_ua = chip->dt.batt_profile_fcc_ua;
+#endif
 #endif
 
 	rc = of_property_read_u32(node,
@@ -4609,8 +4614,11 @@ static int smb5_init_hw(struct smb5 *chip)
 	vote(chg->fv_votable, HW_LIMIT_VOTER,
 		chip->dt.batt_profile_fv_uv > 0, chip->dt.batt_profile_fv_uv);
 #if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if (defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)) && \
+	(defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU))
 	vote(chg->fcc_votable, BATT_VERIFY_VOTER,
 		chip->dt.batt_unverify_fcc_ua > 0, chip->dt.batt_unverify_fcc_ua);
+#endif
 	vote(chg->fv_votable, BATT_PROFILE_VOTER,
 		chg->batt_profile_fv_uv > 0, chg->batt_profile_fv_uv);
 
