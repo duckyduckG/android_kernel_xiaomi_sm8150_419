@@ -304,29 +304,23 @@ struct fg_gen4_chip {
 	struct alarm		esr_fast_cal_timer;
 	struct alarm		soc_scale_alarm_timer;
 	struct delayed_work	pl_enable_work;
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16)
 	struct delayed_work	battery_authentic_work;
 	int			battery_authentic_result;
-#ifdef CONFIG_MACH_XIAOMI_NABU
+	struct delayed_work	ds_romid_work;
+	unsigned char		ds_romid[8];
+	struct delayed_work	ds_status_work;
+	unsigned char		ds_status[8];
+	struct delayed_work	ds_page0_work;
+	unsigned char		ds_page0[16];
+#endif
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	int			battery_authentic_slave_result;
 	int			battery_chip_ok;
 	int			battery_chip_slave_ok;
-#endif
-	struct delayed_work	ds_romid_work;
-	unsigned char		ds_romid[8];
-#ifdef CONFIG_MACH_XIAOMI_NABU
 	unsigned char		ds_slave_romid[8];
-#endif
-	struct delayed_work	ds_status_work;
-	unsigned char		ds_status[8];
-#ifdef CONFIG_MACH_XIAOMI_NABU
 	unsigned char		ds_slave_status[8];
-#endif
-	struct delayed_work	ds_page0_work;
-	unsigned char		ds_page0[16];
-#ifdef CONFIG_MACH_XIAOMI_NABU
 	unsigned char		ds_slave_page0[16];
-#endif
 #endif
 	struct work_struct	pl_current_en_work;
 	struct completion	mem_attn;
@@ -2114,7 +2108,7 @@ static int fg_gen4_get_batt_profile_dt_props(struct fg_gen4_chip *chip,
 	return 0;
 }
 
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 int retry_batt_profile;
 #define BATT_PROFILE_RETRY_COUNT_MAX 5
 #endif
@@ -2137,7 +2131,7 @@ static int fg_gen4_get_batt_profile(struct fg_dev *fg)
 					fg->batt_id_ohms / 1000,
 					chip->batt_age_level, &avail_age_level);
 	else
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	{
 		profile_node = ERR_PTR(-ENXIO);
 		/* if cmdline battery profile vendor is passed to fg driver, use cmdline result */
@@ -4462,7 +4456,7 @@ static void vbat_sync_work(struct work_struct *work)
 	ksys_sync();
 }
 
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 static int battery_authentic_period_ms = 1000;
 #define BATTERY_AUTHENTIC_COUNT_MAX 5
 int retry_battery_authentic_result;
@@ -5125,7 +5119,7 @@ static int fg_psy_get_property(struct power_supply *psy,
 	static bool last_shutdown_delay;
 #endif
 
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16)
 	union power_supply_propval b_val = {0,};
 
 	if (fg->max_verify_psy == NULL) {
@@ -5134,8 +5128,9 @@ static int fg_psy_get_property(struct power_supply *psy,
 			pr_err("max_verify_psy is NULL\n");
 		}
 	}
+#endif
 
-#ifdef CONFIG_MACH_XIAOMI_NABU
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	if (fg->max_verify_slave_psy == NULL) {
 		fg->max_verify_slave_psy = power_supply_get_by_name("batt_verify_slave");
 		if (fg->max_verify_slave_psy == NULL) {
@@ -5143,10 +5138,9 @@ static int fg_psy_get_property(struct power_supply *psy,
 		}
 	}
 #endif
-#endif
 
 	switch (psp) {
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	case POWER_SUPPLY_PROP_AUTHENTIC:
 		if (fg->fake_authentic != -EINVAL) {
 			pval->intval = fg->fake_authentic;
@@ -5623,12 +5617,16 @@ static int fg_psy_set_property(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_SHUTDOWN_DELAY_ENABLE:
 		chip->dt.shutdown_delay_enable = pval->intval;
 		break;
+#endif
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	case POWER_SUPPLY_PROP_AUTHENTIC:
 		fg->fake_authentic = !!pval->intval;
 		break;
 	case POWER_SUPPLY_PROP_CHIP_OK:
 		fg->fake_chip_ok = !!pval->intval;
 		break;
+#endif
+#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
 	case POWER_SUPPLY_PROP_TEMP:
 		fg->batt_fake_temp = pval->intval;
 		break;
@@ -5667,8 +5665,12 @@ static int fg_property_is_writeable(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_SYS_TERMINATION_CURRENT:
 	case POWER_SUPPLY_PROP_VBATT_FULL_VOL:
 	case POWER_SUPPLY_PROP_KI_COEFF_CURRENT:
+#endif
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	case POWER_SUPPLY_PROP_AUTHENTIC:
 	case POWER_SUPPLY_PROP_CHIP_OK:
+#endif
+#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
 	case POWER_SUPPLY_PROP_TEMP:
 #endif
 		return 1;
@@ -5680,7 +5682,7 @@ static int fg_property_is_writeable(struct power_supply *psy,
 }
 
 static enum power_supply_property fg_psy_props[] = {
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	POWER_SUPPLY_PROP_AUTHENTIC,
 	POWER_SUPPLY_PROP_ROMID,
 	POWER_SUPPLY_PROP_DS_STATUS,
@@ -7644,6 +7646,8 @@ static int fg_gen4_probe(struct platform_device *pdev)
 	fg->fake_authentic = -EINVAL;
 	fg->fake_chip_ok = -EINVAL;
 	fg->batt_fake_temp = -EINVAL;
+#endif
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	chip->battery_authentic_result = -EINVAL;
 #ifdef CONFIG_MACH_XIAOMI_NABU
 	chip->battery_authentic_slave_result = -EINVAL;
@@ -7699,6 +7703,8 @@ static int fg_gen4_probe(struct platform_device *pdev)
 	INIT_WORK(&chip->pl_current_en_work, pl_current_en_work);
 #if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
 	INIT_DELAYED_WORK(&fg->soc_monitor_work, soc_monitor_work);
+#endif
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	INIT_DELAYED_WORK(&chip->battery_authentic_work, battery_authentic_work);
 	INIT_DELAYED_WORK(&chip->ds_romid_work, ds_romid_work);
 	INIT_DELAYED_WORK(&chip->ds_status_work, ds_status_work);
@@ -7801,10 +7807,10 @@ static int fg_gen4_probe(struct platform_device *pdev)
 		goto exit;
 	}
 
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16)
 	fg->max_verify_psy = power_supply_get_by_name("batt_verify");
 #endif
-#ifdef CONFIG_MACH_XIAOMI_NABU
+#if  defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	fg->max_verify_slave_psy = power_supply_get_by_name("batt_verify_slave");
 #endif
 	/* Register the power supply */
@@ -7818,7 +7824,7 @@ static int fg_gen4_probe(struct platform_device *pdev)
 		goto exit;
 	}
 
-#if defined(CONFIG_MACH_XIAOMI_VAYU) || defined(CONFIG_MACH_XIAOMI_NABU)
+#if defined(CONFIG_BATT_VERIFY_BY_DS28E16) || defined(CONFIG_BATT_VERIFY_BY_DS28E16_NABU)
 	if (chip->battery_authentic_result != true
 #ifdef CONFIG_MACH_XIAOMI_NABU
 		|| chip->battery_authentic_slave_result != true
