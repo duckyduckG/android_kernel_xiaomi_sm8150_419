@@ -1,5 +1,5 @@
 &qupv3_se4_i2c {
-	#include "../../qcom/smb1390.dtsi"
+	#include "../../qcom_legacy/smb1390.dtsi"
 };
 
 &smb1390_slave {

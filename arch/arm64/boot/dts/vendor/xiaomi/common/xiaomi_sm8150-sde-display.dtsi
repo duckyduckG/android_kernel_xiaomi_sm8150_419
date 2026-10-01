@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../../qcom/sm8150-sde-display.dtsi"
+#include "../../qcom_legacy/sm8150-sde-display.dtsi"
 
 #include "../vayu/display/dsi-panel-j20s-36-02-0a-lcd-dsc-vid.dtsi"
 #include "../vayu/display/dsi-panel-j20s-42-02-0b-lcd-dsc-vid.dtsi"
