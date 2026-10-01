@@ -12,7 +12,7 @@
 
 /dts-v1/;
 
-#include "../qcom/sm8150-v2.dtsi"
+#include "../qcom_legacy/sm8150-v2.dtsi"
 #include "base/sm8150.dtsi"
 
 / {

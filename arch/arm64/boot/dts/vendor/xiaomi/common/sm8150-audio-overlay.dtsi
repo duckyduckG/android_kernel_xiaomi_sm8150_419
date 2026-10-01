@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../../qcom/sm8150-audio-overlay.dtsi"
+#include "../../qcom_legacy/sm8150-audio-overlay.dtsi"
 
 &snd_9360 {
 	status = "disabled";

@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../../qcom/sm8150-pmic-overlay.dtsi"
+#include "../../qcom_legacy/sm8150-pmic-overlay.dtsi"
 
 #include "pm8150.dtsi"
 #include "pm8150b.dtsi"
