@@ -6,11 +6,7 @@
 #define pr_fmt(fmt)	"[drm:%s:%d] " fmt, __func__, __LINE__
 
 #include <uapi/drm/drm_fourcc.h>
-#ifdef CONFIG_DISP_NV12_ALIGN
-#include <uapi/media/msm_media_info_msmnile.h>
-#else
 #include <uapi/media/msm_media_info.h>
-#endif
 
 #include "sde_kms.h"
 #include "sde_formats.h"
