@@ -332,6 +332,8 @@
 			<26 10036 0 0>,		// CNOC off
 			<26 10036 0 100>;	// CNOC on
 
+		qcom,enable-legacy-acd-support;
+
 		regulator-names = "vddcx", "vdd";
 		vddcx-supply = <&gpu_cx_gdsc>;
 		vdd-supply = <&gpu_gx_gdsc>;
