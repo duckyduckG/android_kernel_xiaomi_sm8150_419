@@ -2587,7 +2587,9 @@ static int npu_probe(struct platform_device *pdev)
 		goto error_res_init;
 	}
 
+#ifdef CONFIG_DEBUG_FS
 	npu_debugfs_init(npu_dev);
+#endif
 
 	rc = npu_host_init(npu_dev);
 	if (rc) {
