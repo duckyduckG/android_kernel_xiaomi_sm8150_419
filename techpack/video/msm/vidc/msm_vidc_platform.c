@@ -899,9 +899,9 @@ static struct msm_vidc_codec_capability kona_capabilities[] = {
 static struct msm_vidc_codec_capability sm8150_capabilities[] = {
 	/* {cap_type, domains, codecs, min, max, step_size, default_value} */
 	{CAP_FRAME_WIDTH, DEC, CODECS_ALL, 96, 8192, 1, 1920},
-	{CAP_FRAME_HEIGHT, DEC, CODECS_ALL, 96, 4320, 1, 1080},
+	{CAP_FRAME_HEIGHT, DEC, CODECS_ALL, 96, 8192, 1, 1080},
 	{CAP_FRAME_WIDTH, ENC, CODECS_ALL, 96, 4096, 2, 1920},
-	{CAP_FRAME_HEIGHT, ENC, CODECS_ALL, 96, 2304, 2, 1080},
+	{CAP_FRAME_HEIGHT, ENC, CODECS_ALL, 96, 4096, 2, 1080},
 	/*  ((8196 * 4320) / 256) */
 	{CAP_MBS_PER_FRAME, DEC, CODECS_ALL, 36, 138240, 1, 138240},
 	/*  ((4096 * 2304) / 256) */
@@ -955,7 +955,7 @@ static struct msm_vidc_codec_capability sm8150_capabilities[] = {
 
 	/* Mpeg2 decoder specific */
 	{CAP_FRAME_WIDTH, DEC, MPEG2, 96, 1920, 1, 1920},
-	{CAP_FRAME_HEIGHT, DEC, MPEG2, 96, 1088, 1, 1088},
+	{CAP_FRAME_HEIGHT, DEC, MPEG2, 96, 1920, 1, 1088},
 	/* (1920 * 1088) / 256 */
 	{CAP_MBS_PER_FRAME, DEC, MPEG2, 36, 8160, 1, 8160},
 	/* ((1920 * 1088) / 256) * 30*/
@@ -965,9 +965,9 @@ static struct msm_vidc_codec_capability sm8150_capabilities[] = {
 
 	/* Secure usecase specific */
 	{CAP_SECURE_FRAME_WIDTH, DEC, CODECS_ALL, 96, 4096, 1, 1920},
-	{CAP_SECURE_FRAME_HEIGHT, DEC, CODECS_ALL, 96, 2304, 1, 1080},
+	{CAP_SECURE_FRAME_HEIGHT, DEC, CODECS_ALL, 96, 4096, 1, 1080},
 	{CAP_SECURE_FRAME_WIDTH, ENC, CODECS_ALL, 96, 4096, 2, 1920},
-	{CAP_SECURE_FRAME_HEIGHT, ENC, CODECS_ALL, 96, 2304, 2, 1080},
+	{CAP_SECURE_FRAME_HEIGHT, ENC, CODECS_ALL, 96, 4096, 2, 1080},
 	/* (4096 * 2304) / 256 */
 	{CAP_SECURE_MBS_PER_FRAME, DOMAINS_ALL, CODECS_ALL, 36, 36864, 1, 36864},
 	{CAP_SECURE_BITRATE, DOMAINS_ALL, CODECS_ALL, 1, 40000000, 1, 20000000},
