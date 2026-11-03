@@ -569,6 +569,12 @@ int msm_vdec_s_fmt(struct msm_vidc_inst *inst, struct v4l2_format *f)
 	 */
 	if (f->type == OUTPUT_MPLANE) {
 		fmt = &inst->fmts[OUTPUT_PORT];
+
+		if (inst->core->platform_data->vpu_ver == VPU_VERSION_IRIS1 &&
+			get_v4l2_codec(inst) == V4L2_PIX_FMT_MPEG2) {
+			f->fmt.pix_mp.pixelformat = V4L2_PIX_FMT_NV12_UBWC;
+		}
+
 		fmt_desc = msm_comm_get_pixel_fmt_fourcc(vdec_output_formats,
 			ARRAY_SIZE(vdec_output_formats),
 			f->fmt.pix_mp.pixelformat, inst->sid);
