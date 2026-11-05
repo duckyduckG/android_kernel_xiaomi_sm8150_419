@@ -2319,6 +2319,13 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 	ts->client = client;
 	spi_set_drvdata(ts->client, ts);
 
+	/* ---parse dts--- */
+	ret = nvt_parse_dt(&client->dev);
+	if (ret) {
+		NVT_ERR("parse dt error\n");
+		goto err_spi_setup;
+	}
+
 	/* ---prepare for spi parameter--- */
 	if (ts->client->master->flags & SPI_MASTER_HALF_DUPLEX) {
 		NVT_ERR("Full duplex not supported by master\n");
@@ -2327,6 +2334,7 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 	}
 	ts->client->bits_per_word = 8;
 	ts->client->mode = SPI_MODE_0;
+	ts->client->max_speed_hz = ts->spi_max_freq;
 	ts->debug_flag = 2;
 
 	ret = spi_setup(ts->client);
@@ -2336,13 +2344,6 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 	}
 
 	NVT_LOG("mode=%d, max_speed_hz=%d\n", ts->client->mode, ts->client->max_speed_hz);
-
-	/* ---parse dts--- */
-	ret = nvt_parse_dt(&client->dev);
-	if (ret) {
-		NVT_ERR("parse dt error\n");
-		goto err_spi_setup;
-	}
 
 	ret = nvt_pinctrl_init(ts);
 	if (!ret && ts->ts_pinctrl) {
