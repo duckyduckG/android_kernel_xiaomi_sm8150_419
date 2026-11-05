@@ -26,6 +26,7 @@
 #include <linux/spi/spi.h>
 #include <linux/sysfs.h>
 #include <linux/workqueue.h>
+#include <linux/power_supply.h>
 
 #include "nt36xxx_mem_map.h"
 
@@ -120,6 +121,10 @@ struct nvt_ts_data {
 	struct input_dev *input_dev;
 	struct delayed_work nvt_fwu_work;
 	struct delayed_work nvt_lockdown_work;
+	struct mutex power_supply_lock;
+	struct work_struct power_supply_work;
+	struct notifier_block power_supply_notifier;
+	int is_usb_exist;
 	struct work_struct switch_mode_work;
 	uint16_t addr;
 	int8_t phys[32];

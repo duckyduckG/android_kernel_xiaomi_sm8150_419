@@ -1867,7 +1867,7 @@ static int nvt_set_cur_value(int nvt_mode, int nvt_value)
 	uint8_t temp_value = 0;
 	uint8_t ret = 0;
 
-	if (nvt_mode >= Touch_Mode_NUM && nvt_mode < 0) {
+	if (nvt_mode >= Touch_Mode_NUM || nvt_mode < 0) {
 		NVT_ERR("%s, nvt mode is error:%d", __func__, nvt_mode);
 		return -EINVAL;
 	}
@@ -2085,6 +2085,50 @@ static int nvt_reset_mode(int mode)
 	return 0;
 }
 #endif
+
+static int nvt_power_supply_event(struct notifier_block *nb,
+				  unsigned long event, void *ptr)
+{
+	struct nvt_ts_data *ts =
+	    container_of(nb, struct nvt_ts_data, power_supply_notifier);
+
+	if (ts && &ts->power_supply_work != NULL && ts->event_wq != NULL)
+		queue_work(ts->event_wq, &ts->power_supply_work);
+
+	return 0;
+}
+
+static void nvt_power_supply_work(struct work_struct *work)
+{
+	struct nvt_ts_data *ts =
+		container_of(work, struct nvt_ts_data, power_supply_work);
+	int is_usb_exist = 0;
+	uint8_t buf[3] = {0};
+	int32_t ret;
+
+	mutex_lock(&ts->power_supply_lock);
+	if (bTouchIsAwake) {
+		is_usb_exist = !!power_supply_is_system_supplied();
+		if (is_usb_exist != ts->is_usb_exist || ts->is_usb_exist < 0) {
+			ts->is_usb_exist = is_usb_exist;
+			NVT_ERR("Power_supply_event:%d", is_usb_exist);
+			buf[0] = EVENT_MAP_HOST_CMD;
+			if (is_usb_exist) {
+				NVT_ERR("USB is exist");
+				buf[1] = 0x75;
+			} else {
+				NVT_ERR("USB is not exist");
+				buf[1] = 0x76;
+			}
+			buf[2] = 0x00;
+			ret = CTP_SPI_WRITE(ts->client, buf, 3);
+			if (ret) {
+				NVT_ERR("USB status set failed, ret = %d!", ret);
+			}
+		}
+	}
+	mutex_unlock(&ts->power_supply_lock);
+}
 
 #ifdef CONFIG_TOUCHSCREEN_NVT_DEBUG_FS
 
@@ -2568,6 +2612,17 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 	}
 #endif
 
+	/* is usb exit init */
+	ts->is_usb_exist = -1;
+	mutex_init(&ts->power_supply_lock);
+	INIT_WORK(&ts->power_supply_work, nvt_power_supply_work);
+	ts->power_supply_notifier.notifier_call = nvt_power_supply_event;
+	ret = power_supply_reg_notifier(&ts->power_supply_notifier);
+	if (ret) {
+		NVT_ERR("register power_supply_notifier failed. ret=%d\n", ret);
+		goto err_register_power_supply_notif_failed;
+	}
+
 #ifdef CONFIG_TOUCHSCREEN_NVT_DEBUG_FS
 	ts->debugfs = debugfs_create_dir("tp_debug", NULL);
 	if (ts->debugfs) {
@@ -2600,6 +2655,9 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 	nvt_irq_enable(true);
 
 	return 0;
+
+err_register_power_supply_notif_failed:
+	mutex_destroy(&ts->power_supply_lock);
 
 #ifdef CONFIG_DRM
 	if(drm_unregister_client(&ts->drm_notif))
@@ -2678,6 +2736,11 @@ static int32_t nvt_ts_remove(struct spi_device *client)
 {
 	NVT_LOG("Removing driver...\n");
 
+	if (ts->power_supply_notifier.notifier_call) {
+		power_supply_unreg_notifier(&ts->power_supply_notifier);
+		ts->power_supply_notifier.notifier_call = NULL;
+	}
+
 #ifdef CONFIG_DRM
 	if (drm_unregister_client(&ts->drm_notif))
 		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
@@ -2694,6 +2757,8 @@ static int32_t nvt_ts_remove(struct spi_device *client)
 #if NVT_TOUCH_PROC
 	nvt_flash_proc_deinit();
 #endif
+
+	mutex_destroy(&ts->power_supply_lock);
 
 #if NVT_TOUCH_ESD_PROTECT
 	if (nvt_esd_check_wq) {
@@ -2745,6 +2810,11 @@ static void nvt_ts_shutdown(struct spi_device *client)
 
 	nvt_irq_enable(false);
 
+	if (ts->power_supply_notifier.notifier_call) {
+		power_supply_unreg_notifier(&ts->power_supply_notifier);
+		ts->power_supply_notifier.notifier_call = NULL;
+	}
+
 #ifdef CONFIG_DRM
 	if (drm_unregister_client(&ts->drm_notif))
 		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
@@ -2758,6 +2828,8 @@ static void nvt_ts_shutdown(struct spi_device *client)
 #if NVT_TOUCH_PROC
 	nvt_flash_proc_deinit();
 #endif
+
+	mutex_destroy(&ts->power_supply_lock);
 
 #if NVT_TOUCH_ESD_PROTECT
 	if (nvt_esd_check_wq) {
@@ -2963,6 +3035,9 @@ static int32_t nvt_ts_resume(struct device *dev)
 		NVT_LOG("execute delayed command, set double click wakeup %d\n", ts->db_wakeup);
 		dsi_panel_doubleclick_enable(!!ts->db_wakeup);
 	}
+	/* check usb status */
+	ts->is_usb_exist = -1;
+	queue_work(ts->event_wq, &ts->power_supply_work);
 Exit:
 	if (ts->dev_pm_suspend)
 		pm_relax(dev);
