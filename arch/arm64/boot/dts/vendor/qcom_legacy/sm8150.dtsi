@@ -2385,7 +2385,6 @@
 			dma-coherent;
 		};
 
-#if 0
 		qcom,msm_fastrpc_compute_cb13 {
 			compatible = "qcom,msm-fastrpc-compute-cb";
 			label = "sdsprpc-smd";
@@ -2413,7 +2412,6 @@
 			shared-cb = <4>;
 			dma-coherent;
 		};
-#endif
 	};
 
 	sdhc_2: sdhci@8804000 {
