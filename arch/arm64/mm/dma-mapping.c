@@ -1115,6 +1115,44 @@ static void arm_iommu_get_dma_window(struct device *dev, u64 *dma_addr,
 	*dma_size = of_read_number(ranges + naddr, nsize);
 }
 
+/*
+ * sm8150 has a hardware bug in the slpi-smmu interface where the stream
+ * ID is not removed from the IOVA. This software workaround modifies
+ * the start address of the IOVA address space for fastrpc slpi context banks.
+ * SM8150 and SDMSHRIKE both have sdsp cb's on 414 and workaround is enabled
+ * for both, do the same here
+ */
+static void arm_iommu_sdsp_fixup(struct device *dev, u64 *dma_base)
+{
+	struct device_node *np = dev->of_node;
+	struct of_phandle_args spec;
+	const char *label;
+	u32 cb;
+
+	if (!np || !(of_machine_is_compatible("qcom,sm8150") ||
+		     of_machine_is_compatible("qcom,sdmshrike")))
+		return;
+
+	if (!of_device_is_compatible(np, "qcom,msm-fastrpc-compute-cb") ||
+	    of_property_read_bool(np, "qcom,secure-context-bank") ||
+	    of_property_read_string(np, "label", &label) ||
+	    strcmp(label, "sdsprpc-smd"))
+		return;
+
+	if (of_parse_phandle_with_args(np, "iommus", "#iommu-cells", 0, &spec))
+		return;
+
+	cb = spec.args[0] & 0x3;
+	of_node_put(spec.np);
+
+	if (!cb || *dma_base >= BIT_ULL(32))
+		return;
+
+	*dma_base += (u64)cb << 32;
+	dma_set_mask_and_coherent(dev, DMA_BIT_MASK(34));
+	dev_info(dev, "SDSP SMMU workaround: IOVA base 0x%llx\n", *dma_base);
+}
+
 static void arm_iommu_setup_dma_ops(struct device *dev, u64 dma_base, u64 size)
 {
 	struct iommu_domain *domain;
@@ -1126,6 +1164,7 @@ static void arm_iommu_setup_dma_ops(struct device *dev, u64 dma_base, u64 size)
 		return;
 
 	arm_iommu_get_dma_window(dev, &dma_base, &size);
+	arm_iommu_sdsp_fixup(dev, &dma_base);
 
 	domain = iommu_get_domain_for_dev(dev);
 	if (!domain)

@@ -569,6 +569,20 @@ static int hlosvmperm[1] = {PERM_READ | PERM_WRITE | PERM_EXEC};
 
 static void fastrpc_pm_awake(struct fastrpc_file *fl, int channel_type);
 
+/*
+ * sm8150 has a hardware bug in the slpi-smmu interface where the stream
+ * ID is not removed from the IOVA. This software workaround modifies
+ * the start address of the IOVA address space for fastrpc slpi context banks.
+ * SM8150 and SDMSHRIKE both have sdsp cb's on 414 and workaround is enabled
+ * for both, do the same here
+ */
+static inline bool fastrpc_sdsp_iova_quirk(int cid)
+{
+	return cid == SDSP_DOMAIN_ID &&
+	       (of_machine_is_compatible("qcom,sm8150") ||
+		of_machine_is_compatible("qcom,sdmshrike"));
+}
+
 static inline int64_t getnstimediff(struct timespec64 *start)
 {
 	int64_t ns;
@@ -689,7 +703,8 @@ static void fastrpc_buf_free(struct fastrpc_buf *buf, int cache)
 		VERIFY(err, fl->sctx != NULL);
 		if (err)
 			goto bail;
-		if (fl->sctx->smmu.cb)
+		if (fl->sctx->smmu.cb &&
+		    !fastrpc_sdsp_iova_quirk(fl->cid))
 			buf->phys &= ~((uint64_t)fl->sctx->smmu.cb << 32);
 		cid = fl->cid;
 		VERIFY(err, cid >= ADSP_DOMAIN_ID && cid < NUM_CHANNELS);
@@ -1133,7 +1148,8 @@ static int fastrpc_mmap_create(struct fastrpc_file *fl, int fd,
 		map->phys = sg_dma_address(map->table->sgl);
 
 		if (sess->smmu.cb) {
-			map->phys += ((uint64_t)sess->smmu.cb << 32);
+			if (!fastrpc_sdsp_iova_quirk(fl->cid))
+				map->phys += ((uint64_t)sess->smmu.cb << 32);
 			for_each_sg(map->table->sgl, sgl, map->table->nents,
 				sgl_index)
 				map->size += sg_dma_len(sgl);
@@ -1265,7 +1281,7 @@ static int fastrpc_buf_alloc(struct fastrpc_file *fl, size_t size,
 			current->comm, __func__, size, buf->virt);
 		goto bail;
 	}
-	if (fl->sctx->smmu.cb)
+	if (fl->sctx->smmu.cb && !fastrpc_sdsp_iova_quirk(fl->cid))
 		buf->phys += ((uint64_t)fl->sctx->smmu.cb << 32);
 	trace_fastrpc_dma_alloc(cid, buf->phys, size,
 		dma_attr, (int)rflags);
@@ -5061,7 +5077,18 @@ static int fastrpc_cb_probe(struct device *dev)
 						"dma-coherent");
 	sess->smmu.secure = of_property_read_bool(dev->of_node,
 						"qcom,secure-context-bank");
-	sess->smmu.cb = iommuspec.args[0] & 0xf;
+
+	/* Software workaround for SMMU interconnect HW bug */
+	if (fastrpc_sdsp_iova_quirk(cid)) {
+		sess->smmu.cb = iommuspec.args[0] & 0x3;
+		VERIFY(err, sess->smmu.cb);
+		if (err)
+			goto bail;
+		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(34));
+	} else {
+		sess->smmu.cb = iommuspec.args[0] & 0xf;
+	}
+
 	sess->smmu.dev = dev;
 	sess->smmu.dev_name = dev_name(dev);
 	sess->smmu.enabled = 1;
